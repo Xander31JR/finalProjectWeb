@@ -1,0 +1,57 @@
+{% extends 'layouts/masteradmin.html' %}
+
+{% load static %}
+{% block content %}
+
+<div class="container py-4 d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="w-100" style="max-width: 500px;">
+        <div class="card shadow-sm">
+            <div class="card-header bg-info text-white text-center">
+                <h2 class="mb-0 py-2"><i class="fa-solid fa-pen"></i> Editar Notificación</h2>
+            </div>
+            <div class="card-body px-4 py-4">
+                <form method="post" id="editar-notificacion">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="mensaje" class="form-label">Mensaje:</label>
+                        <textarea name="mensaje" id="mensaje" class="form-control" rows="3" required>{{ notificacion.mensaje }}</textarea>
+                    </div>
+
+                    <div class="form-check mb-3">
+                        <input type="checkbox" class="form-check-input" id="estado" name="estado" {% if notificacion.estado %}checked{% endif %}>
+                        <label class="form-check-label" for="estado">Activa</label>
+                    </div>
+
+                    <center>
+                        <a href="{% url 'lista_notificaciones' %}" class="btn btn-secondary"> 
+                            <i class="fa-solid fa-arrow-left"></i> Volver al Listado 
+                        </a>
+                        <button type="submit" class="btn btn-info text-white">
+                            <i class="fa-solid fa-save"></i> Guardar Cambios
+                        </button>
+                    </center>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $("#editar-notificacion").validate({
+        rules: {
+            mensaje: {
+                required: true,
+                minlength: 50
+            }
+        },
+        messages: {
+            mensaje: {
+                required: "Por favor, ingrese un mensaje.",
+                minlength: "El mensaje debe tener al menos 50 caracteres."
+            }
+        }
+    });
+</script>
+
+{% endblock %}

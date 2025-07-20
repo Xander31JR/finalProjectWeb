@@ -1,0 +1,162 @@
+{% extends 'layouts/masteradmin.html' %}
+{% load static %}
+
+
+
+{% block tittle %}
+<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+  <h1 style="font-family: Montserrat;">Estadísticas Históricas</h1>
+</div>
+{% endblock %}
+
+{% block content %}
+
+
+<style>
+    body { 
+      font-family: sans-serif; margin: 0; padding: 0; 
+    }
+    #mapaEstadistico { 
+      height: 500px !important; 
+      width: 100%;
+
+      border: 5px solid aqua;
+      border-radius: 15px;
+
+    }
+
+</style>
+
+
+<div class="elemntosestadisticashistoricas">
+  <p><em>Determine el período:</em></p>
+  <div style="margin-bottom: 20px;">
+      <label>📆 Fecha inicio:</label>
+      <input type="date" id="fechaInicio" onchange="actualizarMapa()">
+      <label>📆 Fecha fin:</label>
+      <input type="date" id="fechaFin" onchange="actualizarMapa()">
+      <p class="errorEnRangoDeFecha"></p>
+  </div>
+</div>
+
+
+<div id="leyendaMapa" style="
+    position: fixed;
+    bottom: 70px;
+    left: 30px;
+    background: #b3b3b3;
+    padding: 10px;
+    border-radius: 6px;
+    z-index: 1000;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+">
+    <strong>📊 Leyenda:</strong><br>
+    <span style="color: red;">⬤ Máximo consumo</span><br>
+    <span style="color: gold;">⬤ Consumo intermedio</span><br>
+    <span style="color: green;">⬤ Mínimo consumo</span>
+</div>
+
+
+<div id="mapaEstadistico" style="height: 600px;"></div>
+
+
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+const coordenadasInicio = { lat: -0.7415954958310084, lng: -78.64123031371885 };
+const mapa = L.map('mapaEstadistico').setView([coordenadasInicio.lat, coordenadasInicio.lng], 14.5);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+}).addTo(mapa);
+
+// 🧼 Limpia solo los círculos y marcadores
+function limpiarMapa() {
+    mapa.eachLayer(layer => {
+        if (layer instanceof L.Circle || layer instanceof L.Marker) {
+        mapa.removeLayer(layer);
+        }
+    });
+}
+function actualizarMapa() {
+  const inicio = document.getElementById("fechaInicio").value;
+  const fin = document.getElementById("fechaFin").value;
+  const errorElem = document.querySelector(".errorEnRangoDeFecha");
+
+  if (!inicio || !fin) return;
+
+  const fechaInicio = new Date(inicio);
+  const fechaFin = new Date(fin);
+
+  if (fechaFin <= fechaInicio) {
+    errorElem.textContent = "⚠️ La fecha de fin debe ser posterior a la fecha de inicio.";
+    return;
+  } else {
+    errorElem.textContent = ""; // Limpia si el rango es válido
+  }
+
+  // 🔁 Continúa con el fetch solo si la validación pasó
+  fetch(`/notificaciones/estadisticas-geograficas?inicio=${inicio}&fin=${fin}`)
+    .then(res => res.json())
+    .then(data => {
+      limpiarMapa();
+      const maxConsumo = Math.max(...data.map(s => s.consumo_total));
+      const minConsumo = Math.min(...data.map(s => s.consumo_total));
+
+      data.forEach(sensor => {
+        const lat = sensor.usuarioSensor__sensor__latitud;
+        const lng = sensor.usuarioSensor__sensor__longitud;
+
+        let color = 'gold';
+        if (sensor.consumo_total === maxConsumo) color = 'red';
+        else if (sensor.consumo_total === minConsumo) color = 'green';
+
+        const radio = (sensor.consumo_total / maxConsumo) * 100;
+        const radioFinal = Math.max(radio, 30);
+
+        L.circle([lat, lng], {
+          radius: radioFinal,
+          color: color,
+          fillColor: color,
+          fillOpacity: 0.6
+        })
+        .bindPopup(`
+          <strong>${sensor.usuarioSensor__sensor__nombreSensor}</strong><br>
+          Consumo total: ${sensor.consumo_total.toFixed(0)} L
+        `)
+        .addTo(mapa);
+
+        L.marker([lat, lng])
+          .addTo(mapa)
+          .bindTooltip(`${sensor.usuarioSensor__sensor__nombreSensor}`, {
+            permanent: false,
+            direction: "top"
+          });
+      });
+    });
+}
+</script>
+
+<script>
+        window.addEventListener('DOMContentLoaded', () => {
+    const inputInicio = document.getElementById("fechaInicio");
+    const inputFin = document.getElementById("fechaFin");
+
+    const hoy = new Date();
+    const haceDosDias = new Date(hoy);
+    haceDosDias.setDate(hoy.getDate() - 2);
+
+    const ayer = new Date(hoy);
+    ayer.setDate(hoy.getDate() - 1);
+
+    inputInicio.value = haceDosDias.toISOString().split('T')[0];
+    inputFin.value = ayer.toISOString().split('T')[0];
+
+    actualizarMapa(); // Carga inicial
+});
+
+</script>
+
+{% endblock  %}

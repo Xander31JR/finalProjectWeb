@@ -1,0 +1,294 @@
+{% extends 'layouts/masteradmin.html' %}
+{% load static %}
+
+
+
+{% block tittle %}
+<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+    <h2 class="mb-0 py-2"><i class="fa-solid fa-droplet"></i> Medidor de Agua</h2>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <!-- 🧾 Formulario (col izquierda) -->
+        <div class="col-lg-5 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fa-solid fa-plus"></i> Registrar Medidor</h5>
+                </div>
+                <div class="card-body px-4 py-4">
+                    <form method="post" action="{% url 'agregar_sensor' %}" autocomplete="off" id="formmedidor">
+                        {% csrf_token %}
+                        
+                        <!-- ID del Medidor -->
+                        <div class="mb-3">
+                            <label for="sensorID" class="form-label"><i class="fa-solid fa-hashtag"></i> Número de Medidor:</label>
+                            <input type="number" name="sensorID" id="sensorID" class="form-control" required>
+                            <div id="errorID" class="form-text text-danger d-none">
+                                ❌ Este ID de medidor ya está registrado. Usa uno diferente.
+                            </div>
+                        </div>
+
+                        <!-- Familia -->
+                        <div class="mb-3">
+                            <label for="nombreSensor" class="form-label"><i class="fa-solid fa-microchip"></i> Familia (Referencia):</label>
+                            <input type="text" name="nombreSensor" id="nombreSensor" class="form-control" required>
+                        </div>
+
+                        <!-- Coordenadas -->
+                        <div class="row mb-3">
+                            <div class="col">
+                                <label for="latitud" class="form-label"><i class="fa-solid fa-location-dot"></i> Latitud:</label>
+                                <input type="text" name="latitud" id="latitud" class="form-control" readonly>
+                            </div>
+                            <div class="col">
+                                <label for="longitud" class="form-label"><i class="fa-solid fa-location-arrow"></i> Longitud:</label>
+                                <input type="text" name="longitud" id="longitud" class="form-control" readonly>
+                            </div>
+                        </div>
+
+                        <!-- Error zona -->
+                        <div id="errorCoordenadas" class="text-danger text-center d-none mb-3">
+                            ❌ Ubicación fuera de zona permitida.
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="d-flex gap-3 mt-4">
+                            <a href="{% url 'lista_sensor' %}" class="btn btn-outline-danger w-40">
+                                <i class="fa-solid fa-x"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary flex-grow-1" id="btnAgregar">
+                                <i class="fa-solid fa-plus"></i> Registrar Medidor
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- 🗺️ Mapa (col derecha) -->
+        <div class="col-lg-7 mb-4">
+            <label for="mapa_cliente" class="form-label"><b>Zona Geográfica Permitida:</b></label>
+            <div id="mapa_cliente" class="mapa border rounded" style="height: 450px;"></div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        function esperarGoogleMaps() {
+            if (window.google && google.maps && google.maps.Map) {
+                initMap(); // Ya está todo listo, invoca el mapa
+            } else {
+                setTimeout(esperarGoogleMaps, 100); // Espera un poco y vuelve a intentar
+            }
+        }
+
+        esperarGoogleMaps();
+
+        // Tu lógica de validación de ID duplicado
+        const idsRegistrados = {{ sensor_ids|safe }}; 
+        const inputID = document.getElementById("sensorID");
+        const botonAgregar = document.getElementById("btnAgregar");
+        const mensajeID = document.getElementById("errorID");
+
+        inputID.addEventListener("input", function () {
+            const idIngresado = inputID.value.trim();
+            const esDuplicado = idsRegistrados.includes(parseInt(idIngresado));
+
+            mensajeID.style.display = esDuplicado ? "block" : "none";
+            botonAgregar.disabled = esDuplicado;
+        });
+    });
+</script>
+
+
+<!-- Script principal -->
+<script>
+    // Función para inicializar el mapa
+    function initMap() {
+        const latitudInput = document.getElementById("latitud");
+        const longitudInput = document.getElementById("longitud");
+        const botonAgregar = document.getElementById("btnAgregar");
+
+        const coordenadasInicio = { lat: -0.7415954958310084, lng: -78.64123031371885 };
+
+        const mapa = new google.maps.Map(document.getElementById("mapa_cliente"), {
+            center: coordenadasInicio,
+            zoom: 16,
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+        });
+
+        const marcador = new google.maps.Marker({
+            position: coordenadasInicio,
+            map: mapa,
+            draggable: true,
+            title: "Arrástrame o haz clic en el mapa"
+        });
+
+        const coordenadasZona = [
+            { lat: -0.7364113429470731, lng: -78.64182017298604 },
+            { lat: -0.7382487038585325, lng: -78.64051936532326 },
+            { lat: -0.7385284895693702, lng: -78.64007797353952 },
+            { lat: -0.7399363701292166, lng: -78.63954326673161 },
+            { lat: -0.7395716827627106, lng: -78.63858448695582 },
+            { lat: -0.743553567775562,  lng: -78.63794954258522 },
+            { lat: -0.7455735263016952,  lng: -78.64225290103482 },
+            { lat: -0.7436044463933568, lng: -78.64289528140279 },
+            { lat: -0.7429337389406793, lng: -78.64363599034714 },
+            { lat: -0.7414971255382983, lng: -78.64370210686344 },
+            { lat: -0.7401897324232556, lng: -78.64373455412628 },
+            { lat: -0.739381818188093,  lng: -78.6434588784936 },
+            { lat: -0.7384243120840294, lng: -78.64308957563733 },
+            { lat: -0.7378344430874928, lng: -78.64282079641366 },
+            { lat: -0.7373829516594358, lng: -78.6424991686051 },
+            { lat: -0.7364113429470731, lng: -78.64182017298604 }
+        ];
+
+        const poligono = new google.maps.Polygon({
+            paths: coordenadasZona,
+            strokeColor: "#28a745",
+            strokeOpacity: 0.9,
+            strokeWeight: 2,
+            fillColor: "#28a745",
+            fillOpacity: 0.35
+        });
+
+        poligono.setMap(mapa);
+
+        // Validación inicial
+        const dentroInicial = google.maps.geometry.poly.containsLocation(marcador.getPosition(), poligono);
+        document.getElementById("errorCoordenadas").style.display = dentroInicial ? "none" : "block";
+        botonAgregar.disabled = !dentroInicial;
+
+        // Evento clic
+        mapa.addListener("click", function(event) {
+            const latLng = event.latLng;
+            marcador.setPosition(latLng);
+            latitudInput.value = latLng.lat();
+            longitudInput.value = latLng.lng();
+
+            const dentro = google.maps.geometry.poly.containsLocation(latLng, poligono);
+            document.getElementById("errorCoordenadas").style.display = dentro ? "none" : "block";
+            botonAgregar.disabled = !dentro;
+        });
+
+        // Evento drag
+        marcador.addListener("drag", function(event) {
+            const latLng = event.latLng;
+            latitudInput.value = latLng.lat();
+            longitudInput.value = latLng.lng();
+
+            const dentro = google.maps.geometry.poly.containsLocation(latLng, poligono);
+            document.getElementById("errorCoordenadas").style.display = dentro ? "none" : "block";
+            botonAgregar.disabled = !dentro;
+        });
+    }
+
+    // Espera hasta que DOM y Google Maps estén listos
+    document.addEventListener("DOMContentLoaded", function () {
+        function esperarGoogleMaps() {
+            if (window.google && google.maps && google.maps.Map) {
+                initMap();
+            } else {
+                setTimeout(esperarGoogleMaps, 100);
+            }
+        }
+
+        esperarGoogleMaps();
+
+        // Validación de ID duplicado
+        const idsRegistrados = {{ sensor_ids|safe }}; 
+        const inputID = document.getElementById("sensorID");
+        const botonAgregar = document.getElementById("btnAgregar");
+        const mensajeID = document.getElementById("errorID");
+
+        inputID.addEventListener("input", function () {
+            const idIngresado = inputID.value.trim();
+            const esDuplicado = idsRegistrados.includes(parseInt(idIngresado));
+            mensajeID.style.display = esDuplicado ? "block" : "none";
+            botonAgregar.disabled = esDuplicado;
+        });
+    });
+</script>
+
+
+<script>
+$(document).ready(function () {
+    // Método personalizado para validar que haya exactamente 4 palabras (2 nombres y 2 apellidos)
+    $.validator.addMethod("espaciosExactos", function (value, element) {
+        return value.trim().split(/\s+/).length === 2;
+    }, "Ingresa exactamente 2 apellidos (2 palabras separadas por espacios).");
+
+    // Método para validar coordenadas (simple ejemplo, puedes ajustarlo si usas otra lógica)
+    $.validator.addMethod("coordenadaValida", function (value, element) {
+        return /^-?\d+(\.\d+)?$/.test(value);
+    }, "Ingresa una coordenada válida con números decimales.");
+
+    $('#formmedidor').validate({
+        rules: {
+            sensorID: {
+                required: true,
+                Number: true,
+            },
+            nombreSensor: {
+                required: "Este campo es obligatorio",
+                espaciosExactos: "Ingresa exactamente 2 apellidos"
+            },
+            // Coordenadas
+            latitud: {
+                required: true,
+                coordenadaValida: true
+            },
+            longitud: {
+                required: true,
+                coordenadaValida: true
+            }
+        },
+        messages: {
+            sensorID: {
+                required: "Por favor, ingrese el número del medidor de agua.",
+                Number: "Por favor, solo valores numéricos",
+            },
+            nombreSensor: {
+                required: "Por favor, ingrese la familia referencia.",
+                espaciosExactos: "Por favor, ingresa exactamente 2 apellidos."
+            },
+            latitud: {
+                required: "Por favor, ingresa la latitud en el mapa.",
+                coordenadaValida: "Latitud no válida, por favor, verifique en el mapa (ej. -0.123456)."
+            },
+            longitud: {
+                required: "Por favor, ingresa la longitud en el mapa.",
+                coordenadaValida: "Longitud no válida, por favor, verifique en el mapa (ej. -78.123456)."
+            }
+        },
+        errorElement: 'div',
+        errorClass: 'error', // Usa tu CSS personalizado
+        errorPlacement: function (error, element) {
+            if (element.prop('type') === 'file') {
+                error.insertAfter(element.parent());
+            } else {
+                error.insertAfter(element);
+            }
+        },
+        highlight: function (element) {
+            $(element).addClass('error'); // Tu clase CSS personalizada
+        },
+        unhighlight: function (element) {
+            $(element).removeClass('error');
+        }
+    });
+});
+
+</script>
+
+
+
+
+
+{% endblock %}

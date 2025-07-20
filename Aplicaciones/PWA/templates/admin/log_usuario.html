@@ -1,0 +1,114 @@
+{% extends 'layouts/masteradmin.html' %}
+
+{% load static %}
+
+{% block tittle %}
+<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+    <h2 class="mb-3"><i class="fa-solid fa-clock-rotate-left"></i> Logs del Usuario</h2>
+</div>
+{% endblock %}
+
+
+{% block content %}
+
+<div class="content">
+    <div class="d-flex justify-content-between align-items-center mb-3 mt-5">
+        <div>
+            <a href="{% url 'agregar_log_usuario' %}" class="btn btn-success">
+                <i class="fa-solid fa-plus"></i> Agregar Log
+            </a>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table id="tabla-logs" class="table table-striped table-bordered align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Id</th>
+                    <th>Fecha</th>
+                    <th>Evento</th>
+                    <th>Descripción</th>
+                    <th>Acciones</th>
+                </tr>
+                
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td>{{ log.id }}</td>
+                    <td>{{ log.fechaCambio|date:"Y-m-d H:i" }}</td>
+                    <td>{{ log.evento }}</td>
+                    <td>{{ log.descripcion }}</td>
+                    <td>
+                        <a href="{% url 'editar_log_usuario' log.id %}" 
+                           class="btn btn-primary btn-sm mb-1">
+                            <i class="fa-solid fa-pen-to-square"></i> Editar
+                        </a>
+                        <a href="{% url 'eliminar_log_usuario' log.id %}" 
+                           class="btn btn-danger btn-sm delete-button">
+                            <i class="fa-solid fa-trash"></i> Eliminar
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="text-center">
+                        No hay registros de historial disponibles.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.delete-button').forEach(function (boton) {
+            boton.addEventListener('click', function (e) {
+                e.preventDefault();
+                const urlEliminar = this.getAttribute('href');
+
+                Swal.fire({
+                    title: '¿Eliminar registro de historial?',
+                    text: 'Esta acción es permanente y no se puede deshacer.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Sí, eliminar',
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = urlEliminar;
+                    }
+                });
+            });
+        });
+    });
+</script>
+
+
+
+<script>
+$(document).ready(function() {
+    $('#tabla-logs').DataTable({
+        responsive: true,
+        dom: 'Bfrtip',
+        buttons: [
+            { extend: 'copy', text: '<i class="fa fa-copy"></i> Copiar' },
+            { extend: 'csv', text: '<i class="fa fa-file-csv"></i> CSV' },
+            { extend: 'excel', text: '<i class="fa fa-file-excel"></i> Excel' },
+            { extend: 'pdf', text: '<i class="fa fa-file-pdf"></i> PDF' },
+            { extend: 'print', text: '<i class="fa fa-print"></i> Imprimir' }
+        ],
+        language: {
+            url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json'
+        },
+        order: [[0, 'desc']]  // Ordenar por fecha descendente por defecto
+    });
+});
+</script>
+
+{% endblock %}

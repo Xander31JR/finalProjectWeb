@@ -1,0 +1,84 @@
+{% extends 'layouts/masteradmin.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container py-4 d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="w-100" style="max-width: 500px;">
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white text-center">
+                <h2 class="mb-0 py-2"><i class="fa-solid fa-plus-circle"></i> Agregar Tipo de Mensaje</h2>
+            </div>
+            <div class="card-body px-4 py-4">
+                {% if messages %}
+                <div class="mb-3">
+                    {% for message in messages %}
+                    <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %}">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                <form method="post" id="agregar-tipo-mensaje">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="tipoAlerta" class="form-label">Tipo de Alerta *</label>
+                        <input type="text" name="tipoAlerta" id="tipoAlerta" class="form-control" 
+                               required placeholder="Ej: Consumo excesivo">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="mensaje_default" class="form-label">Mensaje por Defecto *</label>
+                        <textarea name="mensaje_default" id="mensaje_default" class="form-control" 
+                                  rows="4" required placeholder="Ingrese el mensaje predeterminado"></textarea>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fa-solid fa-floppy-disk"></i> Guardar Tipo
+                        </button>
+                        <a href="{% url 'lista_tipo_mensaje' %}" class="btn btn-secondary">
+                            <i class="fa-solid fa-arrow-left"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $("#agregar-tipo-mensaje").validate({
+        rules: {
+            tipoAlerta: {
+                required: true,
+                minlength: 3
+            },
+            mensaje_default: {
+                required: true,
+                minlength: 10
+            }
+        },
+        messages: {
+            tipoAlerta: {
+                required: "Este campo es obligatorio",
+                minlength: "Mínimo 3 caracteres"
+            },
+            mensaje_default: {
+                required: "Este campo es obligatorio",
+                minlength: "El mensaje debe tener al menos 10 caracteres"
+            }
+        },
+        errorElement: "div",
+        errorClass: "invalid-feedback",
+        highlight: function(element) {
+            $(element).addClass('is-invalid');
+        },
+        unhighlight: function(element) {
+            $(element).removeClass('is-invalid');
+        }
+    });
+
+</script>
+
+{% endblock %}

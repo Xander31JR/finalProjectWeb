@@ -1,0 +1,448 @@
+
+
+{% extends 'layouts/baseSesionIniciada.html' %}
+{% load static %}
+
+{% block title %}Mis Notificaciones{% endblock %}
+
+{% block seccion %}Mis Notificaciones{% endblock %}
+
+
+{% block linksCss %}
+<link rel="stylesheet" href="{% static 'pwa/css/notificaciones.css' %}">
+{% endblock %}
+
+
+{% block content %}
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+
+<style>
+.elementosdelRegreso {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+
+.mainButons form {
+    margin: 0;
+}
+
+.butonRegresar {
+    background-color: #2ecc71;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 16px;
+    margin-left: 5px;
+    font-size: 16px;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease;
+}
+
+.butonRegresar:hover {
+    background-color: #27ae60;
+}
+
+.elementosdelRegreso h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    flex: 1;
+    padding-left: 10px;
+}
+
+
+</style>
+
+
+
+<div class="sensor-selector" style="margin-bottom: 20px;">
+    <div class="elementosdelRegreso">
+        <div class="mainButons">
+            <form action="{% url 'menuCentral' %}" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="usuario_id" value="{{ usuario_id }}">
+                <button class="butonRegresar" type="submit" class="btn-regresar">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </button>
+            </form>
+        </div>
+        <h3>📡 Por favor, seleccione un medidor:</h3>
+
+    </div>
+    
+    <div class="sensoresLugares">
+        {% for sensor in sensores %}
+            <button 
+                onclick="seleccionarSensor('{{ sensor.id }}')" 
+                style="padding: 10px 20px; border: none; background-color: #3498db; color: white; border-radius: 8px; cursor: pointer;">
+                <img src="{% static 'pwa/img/medidor.png'%}" style="width: 30px; height: auto;"> Medidor {{ sensor.sensor.sensorID }}
+            </button>
+        {% empty %}
+        <div class="contenedorVacio">
+            <div class="mensajeVacio">
+                <i class="fa-solid fa-circle-info"></i>
+                <p>No hay medidores registrados aún, contáctese con la Junta de Agua Potable</p>
+            </div>
+        </div>
+
+        {% endfor %}
+    </div>
+</div>
+
+
+{% if sensores %}
+<div class="btn-group fade"  role="group" style="margin-bottom: 20px;">
+  <button type="button" class="btn btn-outline-primary" onclick="mostrarModo('texto')">📝 Texto</button>
+  <button type="button" class="btn btn-outline-success" onclick="mostrarModo('grafico')">📊 Gráfico</button>
+</div>
+{% endif %}
+
+<div id="contenedorTexto" style="display: none; {% if not sensores %}margin-top: 200px;{% endif %}" class="fade">
+  <div id="notificaciones-contenedor">
+    <p class="tituloNotificaciones">🔔 Aquí se mostrarán las notificaciones del medidor seleccionado.</p>
+  </div>
+</div>
+
+
+<div id="contenedorGrafico" style="display: none;" class="fade">
+    <div class="row mt-4">
+        <div class="col-md-6">
+        <h5>📊 Consumo Diario</h5>
+        <canvas id="graficoDiario"></canvas>
+        </div>
+        <div class="col-md-6">
+        <h5>📈 Consumo Mensual</h5>
+        <canvas id="graficoMensual"></canvas>
+        </div>
+    </div>
+    <div class="row mt-2 text-center">
+        <div class="col-md-6">
+        <p id="infoDiario" style="font-weight: bold; color: #34495e;"></p>
+        </div>
+        <div class="col-md-6">
+        <p id="infoMulta" style="color: #c0392b; font-weight: bold;"></p>
+        <p id="infoMensual" style="font-weight: bold; color: #34495e;"></p>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+<!-- Botón para activar sonido -->
+<button id="activarSonidoBtn" style="display: none;">🔔 Activar Sonidos</button>
+
+
+<audio id="audioNotificacion" src="{% static 'pwa/sounds/notification.mp3' %}" preload="auto"></audio>
+<script>
+    let sonidoHabilitado = false;
+    let ultimoIdNotificacion = null;
+    let chartDiario = null;
+    let chartMensual = null;
+    Chart.register(ChartDataLabels);
+
+    // Definir las URLs base para ambas peticiones
+    const urlNotificacionesBase = "{% url 'obtener_notificaciones_sensor' 0 %}";
+    const urlTextoNotificacionesBase = "{% url 'obtener_notificaciones_sensor_texto' 0 %}";
+    
+    let sensorSeleccionado = null;
+    let intervalo = null;
+
+    // Función para colores
+    function getColorPorcentaje(porcentajeConsumido) {
+        if (porcentajeConsumido < 30) return '#2ecc71';
+        if (porcentajeConsumido < 50) return '#f39c12';
+        if (porcentajeConsumido < 70) return '#e67e22';
+        if (porcentajeConsumido < 80) return '#e74c3c';
+        return '#c0392b';
+    }
+
+    // Función para alternar entre modos
+    function mostrarModo(modo) {
+        const contenedorTexto = document.getElementById("contenedorTexto");
+        const contenedorGrafico = document.getElementById("contenedorGrafico");
+        
+        if (modo === "texto") {
+            contenedorTexto.style.display = "block";
+            contenedorTexto.classList.add = "fade";
+
+            contenedorGrafico.style.display = "none";
+            
+            if (sensorSeleccionado) {
+                mostrarNotificacionesTexto(sensorSeleccionado);
+            }
+        } else {
+            contenedorTexto.style.display = "none";
+            contenedorGrafico.style.display = "block";
+            contenedorGrafico.classList.add = "fade";
+
+            
+            if (sensorSeleccionado) {
+                mostrarNotificaciones(sensorSeleccionado);
+            }
+        }
+    }
+
+    // Función para seleccionar sensor
+    function seleccionarSensor(sensorId) {
+        sensorSeleccionado = sensorId;
+        
+        // Actualizar según el modo visible
+        if (document.getElementById("contenedorTexto").style.display !== "none") {
+            mostrarNotificacionesTexto(sensorId);
+
+        } else {
+            mostrarNotificaciones(sensorId);
+        }
+
+        // Configurar intervalo de actualización
+        if (intervalo) clearInterval(intervalo);
+        intervalo = setInterval(() => {
+            if (sensorSeleccionado) {
+                if (document.getElementById("contenedorTexto").style.display !== "none") {
+                    mostrarNotificacionesTexto(sensorSeleccionado);
+                } else {
+                    mostrarNotificaciones(sensorSeleccionado);
+                }
+            }
+        }, 60000);
+    }
+
+    // Función para mostrar notificaciones en modo texto
+    function mostrarNotificacionesTexto(sensorId) {
+        const url = urlTextoNotificacionesBase.replace('0', sensorId);
+
+        fetch(url)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error en la respuesta del servidor');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const contenedor = document.getElementById("notificaciones-contenedor");
+                contenedor.innerHTML = "";
+                contenedor.classList.add= "fade"
+
+                if (!data.notificaciones || data.notificaciones.length === 0) {
+                    contenedor.innerHTML = "<p class='noHayMensajes' >📭 No hay notificaciones para este medidor.</p>";
+                    return;
+                }
+
+                const lista = document.createElement("ul");
+                lista.style.listStyle = "none";
+                lista.style.padding = "0";
+                lista.style.margin = "0";
+
+                data.notificaciones.forEach(noti => {
+                    const item = document.createElement("li");
+                    item.style.marginBottom = "15px";
+                    item.style.borderRadius = "8px";
+                    item.style.overflow = "hidden";
+
+                    let color = "#95a5a6";
+                    if (noti.tipo === "Alerta Azul") color = "#3498db";
+                    else if (noti.tipo === "Alerta Naranja") color = "#f39c12";
+                    else if (noti.tipo === "Alerta Roja") color = "#e74c3c";
+
+                    item.innerHTML = `
+                        <div style="border-left: 5px solid ${color}; padding: 12px; background: #f8f9fa; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                            <strong style="color: ${color};">${noti.tipo}</strong><br>
+                            <p style="margin: 8px 0;">${noti.mensaje}</p>
+                            <small style="color: #7f8c8d;">${noti.fechaEnvio}</small>
+                        </div>
+                    `;
+                    lista.appendChild(item);
+                });
+
+                contenedor.appendChild(lista);
+            })
+            .catch(error => {
+                console.error("Error al obtener notificaciones de texto:", error);
+                const contenedor = document.getElementById("notificaciones-contenedor");
+                contenedor.innerHTML = `<p style="color: #e74c3c;">Error al cargar notificaciones: ${error.message}</p>`;
+            });
+    }
+
+    // Función para mostrar gráficos
+    function mostrarNotificaciones(sensorId) {
+        const url = urlNotificacionesBase.replace('0', sensorId);
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                const graficoData = data.grafico;
+                if (graficoData) {
+                    const diario = graficoData.diario;
+                    const mensual = graficoData.mensual;
+
+                    const ctxDiario = document.getElementById('graficoDiario').getContext('2d');
+                    const ctxMensual = document.getElementById('graficoMensual').getContext('2d');
+
+                    // Destruir gráficos anteriores si existen
+                    if (chartDiario) chartDiario.destroy();
+                    if (chartMensual) chartMensual.destroy();
+
+                    // Renderizar nuevo gráfico diario
+                    const porcentajeDiario = (diario.consumido / diario.limite) * 100;
+                    const colorDisponibleDiario = getColorPorcentaje(porcentajeDiario);
+
+                    const exceso = diario.consumido > diario.limite ? (diario.consumido - diario.limite) : 0;
+                    const disponible = exceso > 0 ? 0 : (diario.limite - diario.consumido);
+                    const colorDisponible = disponible === 0 ? '#5dade2' : colorDisponibleDiario;
+
+                    const etiquetasDiario = [
+                        `Consumido: ${diario.consumido.toFixed(1)} L`,
+                        `Disponible: ${disponible.toFixed(1)} L`
+                    ];
+
+                    const datosDiario = [diario.consumido, disponible];
+                    const coloresDiario = ['#7f8c8d', colorDisponible];
+
+                    if (exceso > 0) {
+                        etiquetasDiario.push(`⚠️ Exceso: ${exceso.toFixed(1)} L`);
+                        datosDiario.push(exceso);
+                        coloresDiario.push('#e74c3c');
+                    }
+
+                    chartDiario = new Chart(ctxDiario, {
+                        type: 'doughnut',
+                        data: {
+                            labels: etiquetasDiario,
+                            datasets: [{
+                                data: datosDiario,
+                                backgroundColor: coloresDiario
+                            }]
+                        },
+                        options: {
+                            plugins: {
+                                datalabels: {
+                                    display: true,
+                                    color: '#000',
+                                    font: {
+                                        weight: 'bold',
+                                        size: 16
+                                    },
+                                    formatter: (value, ctx) => {
+                                        const dataset = ctx.chart.data.datasets[0].data;
+                                        const total = dataset.reduce((acc, val) => acc + val, 0);
+                                        const index = ctx.dataIndex;
+                                        if (index === 1 && value === 0) return "";
+                                        const porcentaje = ((value / total) * 100).toFixed(1);
+                                        return `${porcentaje}%`;
+                                    }
+                                },
+                                title: {
+                                    display: true,
+                                    text: `Consumo Diario — Límite: ${diario.limite.toFixed(0)} L`,
+                                    color: porcentajeDiario > 100 ? '#c0392b' : '#34495e'
+                                }
+                            }
+                        }
+                    });
+
+                    // Gráfico mensual
+                    const porcentajeMensual = (mensual.consumido / mensual.umbral) * 100;
+                    const colorBaseDisponibleMensual = getColorPorcentaje(porcentajeMensual);
+                    const excesoMensual = mensual.consumido > mensual.umbral ? (mensual.consumido - mensual.umbral) : 0;
+                    const disponibleMensual = mensual.consumido > mensual.umbral ? 0 : (mensual.umbral - mensual.consumido);
+                    const colorDisponibleMensual = disponibleMensual === 0 ? '#5dade2' : colorBaseDisponibleMensual;
+                    const multaEstimada = ((excesoMensual / 1000) * 1.5).toFixed(2);
+
+                    const etiquetasMensual = [
+                        `Consumido: ${mensual.consumido.toFixed(0)} L`,
+                        `Disponible: ${disponibleMensual.toFixed(0)} L`
+                    ];
+                    const datosMensual = [mensual.consumido, disponibleMensual];
+                    const coloresMensual = ['#7f8c8d', colorDisponibleMensual];
+
+                    if (excesoMensual > 0) {
+                        etiquetasMensual.push(`⚠️ Exceso: ${excesoMensual.toFixed(0)} L`);
+                        datosMensual.push(excesoMensual);
+                        coloresMensual.push('#e74c3c');
+                    }
+
+                    chartMensual = new Chart(ctxMensual, {
+                        type: 'doughnut',
+                        data: {
+                            labels: etiquetasMensual,
+                            datasets: [{
+                                data: datosMensual,
+                                backgroundColor: coloresMensual
+                            }]
+                        },
+                        options: {
+                            plugins: {
+                                datalabels: {
+                                    display: true,
+                                    color: '#000',
+                                    font: {
+                                        weight: 'bold',
+                                        size: 16
+                                    },
+                                    formatter: (value, ctx) => {
+                                        const dataset = ctx.chart.data.datasets[0].data;
+                                        const total = dataset.reduce((acc, val) => acc + val, 0);
+                                        const index = ctx.dataIndex;
+                                        if (index === 1 && value === 0) return "";
+                                        const porcentaje = ((value / total) * 100).toFixed(1);
+                                        return `${porcentaje}%`;
+                                    }
+                                },
+                                title: {
+                                    display: true,
+                                    text: `Consumo Mensual — Límite: ${mensual.umbral.toFixed(0)} L`,
+                                    color: porcentajeMensual > 100 ? '#c0392b' : '#34495e'
+                                }
+                            }
+                        }
+                    });
+
+                    document.getElementById("infoMulta").innerText = excesoMensual > 0
+                        ? `🚨 Multa estimada: $${multaEstimada}`
+                        : "";
+
+                    document.getElementById("infoDiario").innerText = `Última lectura registrada: ${data.hora_ultimo}`;
+
+                    const hoy = new Date();
+                    const ultimoDiaMes = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
+                    const diasRestantes = ultimoDiaMes.getDate() - hoy.getDate();
+                    document.getElementById("infoMensual").innerText = `Días faltantes para terminar el mes: ${diasRestantes} días`;
+                }
+            })
+            .catch(error => {
+                console.error("Error al obtener datos para gráficos:", error);
+            });
+    }
+
+    // Inicialización cuando el DOM esté listo
+    document.addEventListener('DOMContentLoaded', function() {
+        // Mostrar modo gráfico por defecto
+        mostrarModo('texto');
+        
+        // Configurar botones de modo
+        document.querySelector('.btn-group button:first-child').addEventListener('click', function() {
+            mostrarModo('texto');
+        });
+        
+        document.querySelector('.btn-group button:last-child').addEventListener('click', function() {
+            mostrarModo('grafico');
+        });
+    });
+</script>
+
+
+
+
+{% endblock %}

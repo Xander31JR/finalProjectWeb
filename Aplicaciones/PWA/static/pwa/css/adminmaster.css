@@ -1,0 +1,226 @@
+
+.table-responsive::-webkit-scrollbar {
+    display: none;
+}
+    
+body.claro .table td, body.claro .table th {
+    background-color: #F5F6FA !important;
+    color: black !important;
+}
+
+body.claro .table-striped tbody tr:nth-of-type(odd) {
+    background-color: #F5F6FA !important;
+}
+
+body.claro .table-striped tbody tr:nth-of-type(even) {
+    background-color: #F5F6FA !important;
+}
+
+body.oscuro .table td, body.oscuro .table th {
+    background-color: #1E1E2E !important;
+    color: #F5F6FA !important;
+}
+
+body.oscuro .table-striped tbody tr:nth-of-type(odd) {
+    background-color: #1E1E2E !important;
+}
+
+body.oscuro .table-striped tbody tr:nth-of-type(even) {
+    background-color: #1E1E2E !important;
+}
+
+body.claro .d-flex {
+    background-color: #F5F6FA !important;
+    color: #1E1E2E !important;
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+/* Modo oscuro */
+body.oscuro .d-flex {
+    background-color: #1E1E2E !important;
+    color: #F5F6FA !important;
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+
+/* Modo claro */
+body.claro .dt-buttons .dt-button {
+    background-color: aqua !important;
+    color: #ffffff !important;
+    border: none !important;
+    margin-right: 8px;
+    font-size: 0.9rem;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+body.claro .dt-buttons .dt-button:hover {
+    background-color: aqua !important;
+}
+
+/* Modo oscuro */
+body.oscuro .dt-buttons .dt-button {
+    background-color: aqua !important;
+    color: #f5f6fa !important;
+    border: none !important;
+    margin-right: 8px;
+    font-size: 0.9rem;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+body.oscuro .dt-buttons .dt-button:hover {
+    background-color: aqua !important;
+}
+
+/* 🔆 Modo Claro */
+body.claro .dt-search input.dt-input {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    border: 1px solid #ced4da !important;
+    border-radius: 4px;
+    padding: 6px;
+}
+
+/* 🌒 Modo Oscuro */
+body.oscuro .dt-search input.dt-input {
+    background-color: #2c2c3c !important;
+    color: #f5f6fa !important;
+    border: 1px solid #444 !important;
+    border-radius: 4px;
+    padding: 6px;
+}
+
+/* 🔆 Modo Claro */
+body.claro .dataTables_info,
+body.claro .dataTables_paginate {
+    color: #212529 !important;
+    font-size: 0.9rem;
+}
+
+/* 🌒 Modo Oscuro */
+body.oscuro .dataTables_info,
+body.oscuro .dataTables_paginate {
+    color: #f5f6fa !important;
+    font-size: 0.9rem;
+}
+/* Botones de paginación en modo oscuro */
+body.oscuro .paginate_button {
+    background-color: #333 !important;
+    color: #f5f6fa !important;
+    border: 1px solid #555 !important;
+    border-radius: 4px;
+    margin: 0 2px;
+}
+
+/* Botones de paginación en modo claro */
+body.claro .paginate_button {
+    background-color: #f0f0f0 !important;
+    color: #212529 !important;
+    border: 1px solid #ccc !important;
+    border-radius: 4px;
+    margin: 0 2px;
+}
+
+
+
+
+
+
+/* 🔆 Modo claro */
+body.claro .dataTables_info,
+body.claro .dataTables_paginate,
+body.claro .paginate_button,
+body.claro .dt-search label,
+body.claro .dt-search input.dt-input {
+    color: #212529 !important;
+    background-color: #ffffff !important;
+    border: 1px solid #ccc !important;
+}
+
+/* 🌒 Modo oscuro */
+body.oscuro .dataTables_info,
+body.oscuro .dataTables_paginate,
+body.oscuro .paginate_button,
+body.oscuro .dt-search label,
+body.oscuro .dt-search input.dt-input {
+    color: #f5f6fa !important;
+    background-color: #2c2c3c !important;
+    border: 1px solid #555 !important;
+}
+
+/* Estilizado de paginación para coherencia */
+body.claro .paginate_button.current,
+body.oscuro .paginate_button.current {
+    font-weight: bold;
+    box-shadow: inset 0 0 0 1px aqua;
+}
+
+/* Botones de paginación hover */
+body.claro .paginate_button:hover,
+body.oscuro .paginate_button:hover {
+    background-color: aqua !important;
+    color: #fff !important;
+}
+
+
+
+
+
+
+
+
+/* 🔆 Modo Claro */
+body.claro .dt-info {
+    color: #212529 !important;
+    background-color: transparent !important;
+    font-size: 0.9rem;
+    margin-top: 10px;
+}
+
+/* 🌒 Modo Oscuro */
+body.oscuro .dt-info {
+    color: #f5f6fa !important;
+    background-color: transparent !important;
+    font-size: 0.9rem;
+    margin-top: 10px;
+}
+
+
+
+
+
+
+
+
+
+/* 🌞 Modo claro */
+body.claro .dt-paging-button {
+    color: #00ffff !important;
+    background-color: white !important;
+    border: 1px solid white !important;
+}
+
+/* 🌒 Modo oscuro */
+body.oscuro .dt-paging-button {
+    color: white !important;
+    background-color: aqua !important;
+    border: 1px solid white !important;
+}
+
+/* Estado deshabilitado en modo oscuro */
+body.oscuro .dt-paging-button.disabled {
+    color: white !important;
+    background-color: aqua !important;
+    opacity: 0.6 !important;
+    cursor: not-allowed !important;
+}
+
+/* Hover visual más fuerte */
+body.oscuro .dt-paging-button:not(.disabled):hover {
+    background-color: aqua !important;
+    color: white !important;
+}
+

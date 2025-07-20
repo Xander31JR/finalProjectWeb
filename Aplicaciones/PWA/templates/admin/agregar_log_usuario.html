@@ -1,0 +1,120 @@
+{% extends 'layouts/masteradmin.html' %}
+{% load static %}
+{% block content %}
+
+<div class="content">
+    <div class="container py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fa-solid fa-plus-circle"></i> Agregar Log</h2>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white">
+                <h3 class="mb-0">Nuevo Registro</h3>
+            </div>
+            <div class="card-body">
+                <form method="post" id="agregar-log">
+                    {% csrf_token %}
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="fechaCambio" class="form-label">Fecha y Hora *</label>
+                            <input type="datetime-local" class="form-control" id="fechaCambio" 
+                                   name="fechaCambio" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="evento" class="form-label">Tipo de Evento *</label>
+                            <select class="form-select" id="evento" name="evento" required>
+                                <option value="">Seleccione un evento</option>
+                                <option value="Login">Inicio de sesión</option>
+                                <option value="Logout">Cierre de sesión</option>
+                                <option value="Failed">Intento fallido</option>
+                                <option value="Lockout">Bloqueo</option>
+                                <option value="Other">Otro</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="usuario" class="form-label">Usuario *</label>
+                            <select class="form-select" id="usuario" name="usuario" required>
+                                <option value="">Seleccione un usuario</option>
+                                {% for usuario in usuarios %}
+                                <option value="{{ usuario.id }}">{{ usuario.nombreUsuario }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="descripcion" class="form-label">Descripción *</label>
+                            <input type="text" class="form-control" id="descripcion" 
+                                   name="descripcion" required placeholder="Descripción del evento">
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <button type="submit" class="btn btn-success me-md-2">
+                            <i class="fa-solid fa-floppy-disk"></i> Guardar Registro
+                        </button>
+                        <a href="{% url 'ver_logs_usuario' %}" class="btn btn-secondary">
+                            <i class="fa-solid fa-times"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.min.js"></script>
+<script>
+$(document).ready(function() {
+    $("#agregar-log").validate({
+        rules: {
+            fechaCambio: {
+                required: true
+            },
+            evento: {
+                required: true
+            },
+            usuario: {
+                required: true
+            },
+            descripcion: {
+                required: true,
+                minlength: 5
+            }
+        },
+        messages: {
+            fechaCambio: {
+                required: "Por favor ingrese la fecha y hora"
+            },
+            evento: {
+                required: "Seleccione un tipo de evento"
+            },
+            usuario: {
+                required: "Seleccione un usuario"
+            },
+            descripcion: {
+                required: "Ingrese una descripción",
+                minlength: "Mínimo 5 caracteres"
+            }
+        },
+        errorElement: "div",
+        errorClass: "invalid-feedback",
+        highlight: function(element) {
+            $(element).addClass('is-invalid');
+        },
+        unhighlight: function(element) {
+            $(element).removeClass('is-invalid');
+        }
+    });
+
+    // Establecer fecha/hora actual por defecto
+    const now = new Date();
+    const timezoneOffset = now.getTimezoneOffset() * 60000;
+    const localISOTime = (new Date(now - timezoneOffset)).toISOString().slice(0, 16);
+    document.getElementById('fechaCambio').value = localISOTime;
+});
+</script>
+
+{% endblock %}

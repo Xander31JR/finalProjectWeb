@@ -1,0 +1,180 @@
+{% extends 'layouts/masteradmin.html' %}
+{% load static %}
+
+
+
+{% block tittle %}
+<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+    <h2 class="mb-3"> Creación de nueva asignación</h2>
+</div>
+{% endblock %}
+
+
+{% block content %}
+
+<div class="w-100 mx-auto" style="max-width: 600px;">
+    <div class="card shadow-sm">
+
+        <div class="card-body px-4 py-4">
+
+            <form method="POST" action="{% url 'nuevoAsignacion' %}" id="form-asignacion">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="usuario_id" class="form-label">Selecciona el usuario:</label>
+                    <select class="selectpicker form-select" name="usuario_id" id="usuario_id" data-live-search="true" title="Buscar usuario..." >
+                        <option value="" disabled selected>-- Selecciona un usuario --</option>
+                        {% for usuario in usuarios %}
+                            <option value="{{ usuario.id }}"
+                                {% if usuario.fotoPerfil %}
+                                    data-foto="{{ usuario.fotoPerfil.url }}"
+                                {% else %}
+                                    data-foto="{% static 'img/default-avatar.png' %}"
+                                {% endif %}>
+                                {{ usuario.nombreUsuario }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div id="imagenUsuario" class="text-center mb-4">
+                    <img id="previewFoto" src="{% static 'img/default-avatar.png' %}" alt="Foto de usuario"
+                        class="rounded-circle shadow" style="width: 80px; height: 80px; object-fit: cover;">
+                </div>
+
+                <div class="mb-3">
+                    <label for="sensor_id" class="form-label">Selecciona el medidor:</label>
+                    <select class="selectpicker form-select" name="sensor_id" id="sensor_id" data-live-search="true" title="Buscar sensor..." >
+                        {% if sensores %}
+                            <option value="" disabled selected>-- Selecciona un medidor --</option>
+                            {% for sensor in sensores %}
+                                <option value="{{ sensor.sensorID }}">{{ sensor.nombreSensor }} (#{{ sensor.sensorID }})</option>
+                            {% endfor %}
+                        {% else %}
+                            <option value="" disabled selected>No hay ningún medidor para asignar.</option>
+                        {% endif %}
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="medicion_editar" class="form-label">Medición base al incio del Mes (Litros):</label>
+                    <input type="number" step="0.01" name="medicionBase" id="medicion_editar" class="form-control" >
+                </div>
+
+                <div class="mb-3">
+                    <label for="limite_editar" class="form-label">Límite máximo de consumo DIARIO (Litros):</label>
+                    <input type="number" step="0.01" name="limiteDiario" id="limite_editar" class="form-control" >
+                </div>
+
+                <div class="mb-3">
+                    <label for="umbral_editar" class="form-label">Límite máximo de consumo MENSUAL (Litros):</label>
+                    <input type="number" step="0.01" name="umbralAlerta" id="umbral_editar" class="form-control" >
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{% url 'listaAsignacion' %}" class="btn btn-outline-danger">
+                        <i class="fa-solid fa-x"></i> Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fa-solid fa-paper-plane"></i> Asignar Medior
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+
+<script>
+$(document).ready(function () {
+    $('.selectpicker').selectpicker();
+
+    $('#usuario_id').on('changed.bs.select', function () {
+        const selectedValue = $(this).val();
+        const option = $(this).find('option[value="' + selectedValue + '"]');
+        const fotoUrl = option.data('foto') || "{% static 'img/default-avatar.png' %}";
+
+        console.log('Valor seleccionado:', selectedValue);
+        console.log('URL foto:', fotoUrl);
+
+        $('#previewFoto').fadeOut(100, function () {
+            $(this).attr('src', fotoUrl).fadeIn(150);
+        });
+    });
+});
+</script>
+
+
+<script>
+
+
+    $('#form-asignacion').validate({
+        rules: {
+            medicionBase: {
+                required: true,
+                number: true,
+                min: 0,
+                max: 10000000
+            },
+            limiteDiario: {
+                required: true,
+                number: true,
+                min: 0,
+                max: 500
+            },
+            umbralAlerta: {
+                required: true,
+                number: true,
+                min: 1000,
+                max: 10000
+            },
+            sensor_id: {
+                required: true
+            },
+            usuario_id: {
+                required: true
+            }
+        },
+        messages: {
+            medicionBase: {
+                required: "Por favor, ingresa la medición base del incio de mes.",
+                number: "El valor debe ser numérico.",
+                min: "No se permiten valores negativos.",
+                max: "La medición no puede superar los 10,000,000 litros."
+            },
+            limiteDiario: {
+                required: "Por favor, ingresa el límite de consumo DIARIO.",
+                number: "Debe ser un número válido.",
+                min: "El límite de consumo DIARIO no puede ser negativo.",
+                max: "El límite de consumo DIARIO no puede ser mayor a 500 litros."
+            },
+            umbralAlerta: {
+                required: "Por favor, ingresa el límite de consumo MENSUAL.",
+                number: "Debe ser un número válido.",
+                min: "El límite de consumo MENSUAL mínimo permitido es de 1,000 litros.",
+                max: "El límite de consumo MENSUAL permitido es de 10,000 litros."
+            },
+            sensor_id: {
+                required: "Debes seleccionar un sensor disponible para la asignación."
+            },
+            usuario_id: {
+                required: "Debes seleccionar un usuario para la asignación."
+            }
+        },
+        errorClass: "error",
+        errorElement: "div",
+        highlight: function (element) {
+            $(element).addClass("error");
+        },
+        unhighlight: function (element) {
+            $(element).removeClass("error");
+        }
+    });
+
+</script>
+
+
+
+
+{% endblock %}

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f9f9f9;
+            padding: 20px;
+        }
+        .codigo-box {
+            background-color: #f1f1f1;
+            padding: 15px 25px;
+            font-size: 24px;
+            letter-spacing: 2px;
+            font-weight: bold;
+            color: #222;
+            border-radius: 8px;
+            display: inline-block;
+        }
+        .container {
+            max-width: 500px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.06);
+        }
+        .saludo {
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <p class="saludo">Hola {{ nombre }},</p>
+        <p>Gracias por registrarte. Aquí tienes tu código de verificación:</p>
+        <div class="codigo-box">{{ codigo }}</div>
+        <p style="margin-top: 20px;">Por favor, ingrésalo en el formulario para completar tu registro.</p>
+        <p>Si no solicitaste este código, puedes ignorar este mensaje.</p>
+        <p style="margin-top: 30px; font-size: 12px; color: #777;">Este código expirará en unos minutos por tu seguridad.</p>
+    </div>
+</body>
+</html>

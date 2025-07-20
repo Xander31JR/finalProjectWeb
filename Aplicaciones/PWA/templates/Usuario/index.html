@@ -1,0 +1,126 @@
+{% extends 'layouts/masteradmin.html' %}
+{% load static %}
+
+
+
+{% block tittle %}
+<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+    <h2 class="mb-3"><i class="fa-solid fa-users"></i> Lista de Usuarios Registrados</h2>
+</div>
+{% endblock %}
+
+{% block content %}
+
+<div class="content">
+    <div class="container py-4">
+        <div class="d-flex justify-content-between align-items-center mb-3 mt-5">
+            <a href="{% url 'agregar_usuario' %}" class="btn btn-success">
+                <i class="fa-solid fa-plus"></i> Agregar nuevo usuario
+            </a>
+        </div>
+        <div class="table-responsive mb-4">
+            <table id="tabla-usuarios" class="table table-striped table-bordered align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Foto</th>
+                        <th># de cédula</th> 
+                        <th>Correo</th>
+                        <th>Nombre</th>
+                        <th>Teléfono</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for usuario in usuarios %}
+                    <tr>
+                        <td>{{ usuario.id }}</td>
+                        <td>
+                            {% if usuario.fotoPerfil %}
+                                <img src="{{ usuario.fotoPerfil.url }}" alt="Foto de perfil" class="rounded-circle shadow" style="width: 50px; height: 50px; object-fit: cover;">
+                            {% else %}
+                                <p>sin foto de perfil</p>
+                            {% endif %}
+                        </td>
+                        <td>{{ usuario.dni }}</td>
+                        <td>{{ usuario.correoUsuario }}</td>
+                        <td>{{ usuario.nombreUsuario }}</td>
+                        <td>{{ usuario.telefonoUsuario }}</td>
+
+                        <td>
+                            <a href="{% url 'editar_usuario' usuario.id %}" class="btn btn-primary btn-sm mb-1">
+                                <i class="fa-solid fa-pen-to-square"></i> Editar
+                            </a>
+                            <a href="{% url 'eliminar_usuario' usuario.id %}" class="btn btn-danger btn-sm delete-button mb-1">
+                                <i class="fa-solid fa-trash"></i> Eliminar
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- SweetAlert -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- jQuery Validation -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
+    <!-- DataTables y exportación -->
+    <script src="//cdn.datatables.net/2.3.1/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.1/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.1/js/buttons.print.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+
+    <script>
+    // Confirmación de eliminación con SweetAlert
+    $(document).ready(function() {
+        $('.delete-button').on('click', function(e) {
+            e.preventDefault();
+            const deleteUrl = $(this).attr('href');
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "¡No podrás revertir esto!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sí, eliminarlo!',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = deleteUrl;
+                }
+            });
+        });
+
+        // Inicializar DataTables en todas las tablas
+        $('#tabla-usuarios, #tabla-asignaciones, #tabla-sensores, #tabla-estatico, #tabla-dinamico, #tabla-historico, #tabla-limite, #tabla-logs, #tabla-notificaciones, #tabla-tipo-mensaje').DataTable({
+            responsive: true,
+            dom: 'Bfrtip',
+            buttons: [
+                { extend: 'copy', text: '<i class="fa fa-copy"></i> Copiar' },
+                { extend: 'csv', text: '<i class="fa fa-file-csv"></i> CSV' },
+                { extend: 'excel', text: '<i class="fa fa-file-excel"></i> Excel' },
+                { extend: 'pdf', text: '<i class="fa fa-file-pdf"></i> PDF' },
+                { extend: 'print', text: '<i class="fa fa-print"></i> Imprimir' }
+            ],
+            language: {
+                url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json'
+            }
+        });
+    });
+    </script>
+
+
+        
+{% endblock %}

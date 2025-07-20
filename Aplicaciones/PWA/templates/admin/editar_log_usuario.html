@@ -1,0 +1,85 @@
+{% extends 'layouts/masteradmin.html' %}
+{% load static %}
+{% block content %}
+
+<div class="content">
+    <div class="container py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fa-solid fa-clock-rotate-left"></i> Editar Log</h2>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">Registro #{{ log.id }}</h3>
+            </div>
+            <div class="card-body">
+                <form method="post" id="editar-log">
+                    {% csrf_token %}
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="fechaCambio" class="form-label">Fecha y Hora</label>
+                            <input type="datetime-local" class="form-control" id="fechaCambio" 
+                            name="fechaCambio" value="{{ log.fechaCambio|date:'Y-m-d\TH:i' }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="evento" class="form-label">Tipo de Evento</label>
+                            <select class="form-select" id="evento" name="evento" required>
+                                <option value="Login" {% if log.evento == 'Login' %}selected{% endif %}>Inicio de sesión</option>
+                                <option value="Logout" {% if log.evento == 'Logout' %}selected{% endif %}>Cierre de sesión</option>
+                                <option value="Failed" {% if log.evento == 'Failed' %}selected{% endif %}>Intento fallido</option>
+                                <option value="Lockout" {% if log.evento == 'Lockout' %}selected{% endif %}>Bloqueo</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="descripcion" class="form-label">Descripción</label>
+                        <textarea class="form-control" id="descripcion" name="descripcion" 
+                        rows="3" required>{{ log.descripcion }}</textarea>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <button type="submit" class="btn btn-primary me-md-2">
+                            <i class="fa-solid fa-floppy-disk"></i> Guardar Cambios
+                        </button>
+                        <a href="{% url 'ver_logs_usuario' %}" class="btn btn-secondary">
+                            <i class="fa-solid fa-times"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $("#editar-log").validate({
+        rules: {
+            fechaCambio: {
+                required: true
+                
+            },
+            evento: {
+                required: true
+            },
+            descripcion: {
+                required: true,
+                minlength: 5
+            }
+        },
+        messages: {
+            fechaCambio: {
+                required: "Por favor, ingrese la fecha y hora del cambio.",
+            },
+            evento: {
+                required: "Por favor, seleccione un tipo de evento."
+            },
+            descripcion: {
+                required: "Por favor, ingrese una descripción.",
+                minlength: "La descripción debe tener al menos 5 caracteres."
+            }
+        }
+    });
+</script>
+
+{% endblock %}

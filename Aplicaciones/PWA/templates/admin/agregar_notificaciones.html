@@ -1,0 +1,124 @@
+{% extends 'layouts/masteradmin.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container py-4 d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="w-100" style="max-width: 600px;">
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white text-center">
+                <h2 class="mb-0 py-2"><i class="fa-solid fa-plus-circle"></i> Agregar Notificación</h2>
+            </div>
+            <div class="card-body px-4 py-4">
+                {% if messages %}
+                <div class="mb-3">
+                    {% for message in messages %}
+                    <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %}">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                <form method="post" id="agregar-notificacion">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="mensaje" class="form-label">Mensaje *</label>
+                        <textarea name="mensaje" id="mensaje" class="form-control" rows="3" required placeholder="Ingrese el mensaje de la notificación"></textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="usuarioSensor" class="form-label">Usuario-Sensor *</label>
+                            <select name="usuarioSensor" id="usuarioSensor" class="form-select selectpicker" data-live-search="true" title="Buscar usuario..." required>
+                                <option value="">Seleccione una opción</option>
+                                {% for us in usuarios_sensores %}
+                                <option value="{{ us.id }}">
+                                    {{ us.usuario.nombreUsuario }} - {{ us.sensor.sensorID }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="tipoMensaje" class="form-label">Tipo de Mensaje *</label>
+                            <select name="tipoMensaje" id="tipoMensaje" class="form-select" required>
+                                <option value="">Seleccione un tipo</option>
+                                {% for tm in tipos_mensaje %}
+                                <option value="{{ tm.id }}">{{ tm.tipoAlerta }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-check mb-3">
+                        <input type="checkbox" class="form-check-input" id="estado" name="estado" checked>
+                        <label class="form-check-label" for="estado">Notificación activa</label>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fa-solid fa-floppy-disk"></i> Guardar Notificación
+                        </button>
+                        <a href="{% url 'lista_notificaciones' %}" class="btn btn-secondary"> 
+                            <i class="fa-solid fa-arrow-left"></i> Volver al Listado 
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $("#agregar-notificacion").validate({
+        rules: {
+            mensaje: {
+                required: true,
+                minlength: 5
+            },
+            usuarioSensor: {
+                required: true
+            },
+            tipoMensaje: {
+                required: true
+            }
+        },
+        messages: {
+            mensaje: {
+                required: "Por favor ingrese el mensaje de la notificación",
+                minlength: "El mensaje debe tener al menos 5 caracteres"
+            },
+            usuarioSensor: {
+                required: "Seleccione un usuario y sensor"
+            },
+            tipoMensaje: {
+                required: "Seleccione un tipo de mensaje"
+            }
+        },
+        errorElement: "div",
+        errorClass: "invalid-feedback",
+        highlight: function(element) {
+            $(element).addClass('is-invalid');
+        },
+        unhighlight: function(element) {
+            $(element).removeClass('is-invalid');
+        },
+        errorPlacement: function(error, element) {
+            if (element.attr("type") == "checkbox") {
+                error.insertAfter(element.parent());
+            } else {
+                error.insertAfter(element);
+            }
+        }
+    });
+
+</script>
+
+<script>
+    $(document).ready(function () {
+        $('#usuarioSensor').selectpicker();
+    });
+</script>
+
+
+{% endblock %}

@@ -1,0 +1,221 @@
+{% extends 'layouts/masteradmin.html' %}
+{% load static %}
+
+
+
+{% block tittle %}
+<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+    <h2 class="mb-0 py-2"><i class="fa-solid fa-droplet"></i> Medidor de Agua</h2>
+</div>
+{% endblock %}
+
+{% block content %}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        
+        <div class="col-lg-5 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <i class="fa-solid fa-pen-to-square"></i> Editar Medidor
+                </div>
+                <div class="card-body">
+                    <form id="formmedidor" method="post" action="{% url 'editar_sensor' sensor.sensorID %}" autocomplete="off">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label for="sensorID" class="form-label">
+                                <i class="fa-solid fa-hashtag"></i> Número de Medidor de Agua:
+                            </label>
+                            <input type="number" name="sensorID" id="sensorID" class="form-control" value="{{ sensor.sensorID }}" readonly>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="nombreSensor" class="form-label">
+                                <i class="fa-solid fa-microchip"></i> Familia (Referencia):
+                            </label>
+                            <input type="text" name="nombreSensor" id="nombreSensor" class="form-control" value="{{ sensor.nombreSensor }}" required>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col">
+                                <label for="latitud" class="form-label"><i class="fa-solid fa-location-dot"></i> Latitud:</label>
+                                <input type="text" name="latitud" id="latitud" class="form-control" value="{{ sensor.latitud }}" readonly>
+                            </div>
+                            <div class="col">
+                                <label for="longitud" class="form-label"><i class="fa-solid fa-location-arrow"></i> Longitud:</label>
+                                <input type="text" name="longitud" id="longitud" class="form-control" value="{{ sensor.longitud }}" readonly>
+                            </div>
+                        </div>
+
+
+                        <div class="d-flex gap-3 mt-4">
+                            <a href="{% url 'lista_sensor' %}" class="btn btn-outline-danger w-40">
+                                <i class="fa-solid fa-x"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary flex-grow-1" id="btnEditar">
+                                <i class="fa-solid fa-file-pen"></i> Editar Medidor
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-7 mb-4">
+            <label for="mapa_cliente" class="form-label"><b>Zona Geográfica Permitida:</b></label>
+            <div id="mapa_cliente" class="mapa border" style="height: 450px;"></div>
+            <div id="errorCoordenadas" class="text-danger mt-3 text-center d-none">
+                Ubicación fuera de zona permitida
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<script>
+    function initMap() {
+    const latitudInput = document.getElementById('latitud');
+    const longitudInput = document.getElementById('longitud');
+
+    const coordenadasInicio = {
+        lat: parseFloat(latitudInput.value.replace(',', '.')),
+        lng: parseFloat(longitudInput.value.replace(',', '.'))
+    };
+
+
+    const mapa = new google.maps.Map(document.getElementById('mapa_cliente'), {
+        center: coordenadasInicio,
+        zoom: 16,
+        mapTypeId: google.maps.MapTypeId.ROADMAP
+    });
+
+    const marcador = new google.maps.Marker({
+        position: coordenadasInicio,
+        map: mapa,
+        draggable: true,
+        title: "Arrástrame o haz clic en el mapa"
+    });
+
+    const coordenadasZona = [
+        { lat: -0.7364113429470731, lng: -78.64182017298604 },
+        { lat: -0.7382487038585325, lng: -78.64051936532326 },
+        { lat: -0.7385284895693702, lng: -78.64007797353952 },
+        { lat: -0.7399363701292166, lng: -78.63954326673161 },
+        { lat: -0.7395716827627106, lng: -78.63858448695582 },
+        { lat: -0.743553567775562,  lng: -78.63794954258522 },
+        { lat: -0.7455735263016952,  lng: -78.64225290103482},
+        { lat: -0.7436044463933568, lng: -78.64289528140279 },
+        { lat: -0.7429337389406793, lng: -78.64363599034714 },
+        { lat: -0.7414971255382983, lng: -78.64370210686344 },
+        { lat: -0.7401897324232556, lng: -78.64373455412628 },
+        { lat: -0.739381818188093,  lng: -78.6434588784936 },
+        { lat: -0.7384243120840294, lng: -78.64308957563733 },
+        { lat: -0.7378344430874928, lng: -78.64282079641366 },
+        { lat: -0.7373829516594358, lng: -78.6424991686051 },
+        { lat: -0.7364113429470731, lng: -78.64182017298604 }
+    ];
+
+    const poligono = new google.maps.Polygon({
+        paths: coordenadasZona,
+        strokeColor: '#28a745',
+        strokeOpacity: 0.9,
+        strokeWeight: 2,
+        fillColor: '#28a745',
+        fillOpacity: 0.35
+    });
+
+    poligono.setMap(mapa);
+
+
+    mapa.addListener('click', function(event) {
+        const latLng = event.latLng;
+        marcador.setPosition(latLng);
+        document.getElementById("latitud").value = latLng.lat();
+        document.getElementById("longitud").value = latLng.lng();
+
+        const dentro = google.maps.geometry.poly.containsLocation(latLng, poligono);
+        document.getElementById("errorCoordenadas").style.display = dentro ? "none" : "block";
+    });
+
+    marcador.addListener('drag', function(event) {
+        const latLng = event.latLng;
+        document.getElementById("latitud").value = latLng.lat();
+        document.getElementById("longitud").value = latLng.lng();
+
+        const dentro = google.maps.geometry.poly.containsLocation(latLng, poligono);
+        document.getElementById("errorCoordenadas").style.display = dentro ? "none" : "block";
+    });
+    const botonEditar = document.getElementById("btnEditar");
+
+    const dentroInicial = google.maps.geometry.poly.containsLocation(marcador.getPosition(), poligono);
+    document.getElementById("errorCoordenadas").style.display = dentroInicial ? "none" : "block";
+    botonEditar.disabled = !dentroInicial;
+
+    mapa.addListener("click", function(event) {
+        const latLng = event.latLng;
+        marcador.setPosition(latLng);
+        latitudInput.value = latLng.lat();
+        longitudInput.value = latLng.lng();
+
+        const dentro = google.maps.geometry.poly.containsLocation(latLng, poligono);
+        document.getElementById("errorCoordenadas").style.display = dentro ? "none" : "block";
+        botonEditar.disabled = !dentro;
+    });
+
+    marcador.addListener("dragend", function(event) {
+        const latLng = event.latLng;
+        latitudInput.value = latLng.lat();
+        longitudInput.value = latLng.lng();
+
+        const dentro = google.maps.geometry.poly.containsLocation(latLng, poligono);
+        document.getElementById("errorCoordenadas").style.display = dentro ? "none" : "block";
+        botonEditar.disabled = !dentro;
+    });
+
+}
+
+</script>
+
+
+<script>
+$(document).ready(function () {
+
+    $.validator.addMethod("espaciosExactos", function (value, element) {
+        return value.trim().split(/\s+/).length === 2;
+    }, "Ingresa exactamente 2 apellidos (2 palabras separadas por espacios).");
+
+    $('#formmedidor').validate({
+        rules: {
+            nombreSensor: {
+                required: true,
+                maxlength: 100,
+                espaciosExactos: "Ingresa exactamente 2 apellidos"
+            }
+        },
+        messages: {
+            nombreSensor: {
+                required: "Por favor, ingresa una la familia referencia.",
+                maxlength: "El nombre no debe superar los 100 caracteres.",
+                espaciosExactos: "Por favor, ingresa exactamente 2 apellidos"
+            }
+        },
+        errorElement: 'div',
+        errorClass: 'error', // Usa tu clase CSS personalizada
+        highlight: function (element) {
+            $(element).addClass('error');
+        },
+        unhighlight: function (element) {
+            $(element).removeClass('error');
+        },
+        errorPlacement: function (error, element) {
+            error.insertAfter(element); // Coloca el error debajo del input
+        }
+    });
+});
+</script>
+
+
+{% endblock %}

@@ -1,0 +1,391 @@
+{% extends 'layouts/baseSesionIniciada.html' %}
+{% load static %}
+
+
+{% block title %}Mis Medidores{% endblock %}
+
+{% block seccion %}Mis Medidores{% endblock %}
+
+
+{% block linksCss %}
+<link rel="stylesheet" href="{% static 'pwa/css/agregarNuevoSensor.css' %}">
+{% endblock %}
+
+
+{% block content %}
+
+
+<!--
+<div class="agregarNuevo">
+    <a href="#" onclick="abrirModalAgregar('{{ 1 }}')"><i class="fa-solid fa-plus"></i> Nuevo sensor</a>
+</div>
+-->
+
+<style>
+.elementosdelRegreso {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    
+    flex-wrap: wrap;
+}
+
+.formParaRegresarAtras {
+    margin: 0;
+    width: 40%;
+    margin: 10px;
+}
+
+.butonRegresar {
+    background-color: #2ecc71;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 16px;
+    margin-left: 5px;
+    font-size: 16px;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease;
+}
+
+.butonRegresar:hover {
+    background-color: #27ae60;
+}
+.elementosdelRegreso h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    flex: 1;
+    padding-left: 10px;
+}
+
+
+/* Asegura que el padre permita posicionamiento absoluto */
+.posicionTarjeta {
+    position: relative;
+    padding-top: 32px; /* para que la fecha no se superponga al contenido */
+}
+
+/* Estilo visual para la fecha */
+.fechaTarjeta {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    background-color: #ededed;
+    color: #1E1E2C;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* Si estás en modo oscuro */
+body.oscuro .fechaTarjeta {
+    background-color: #1E1E2C;
+    color: #ffffff;
+}
+
+
+@media screen and (max-width: 600px) {
+.formParaRegresarAtras {
+    width: 95%;
+}
+
+
+}
+</style>
+
+
+<form class="formParaRegresarAtras" action="{% url 'menuCentral' %}" method="post">
+    {% csrf_token %}
+    <input type="hidden" name="usuario_id" value="{{ usuario_id }}">
+    <button class="butonRegresar" type="submit" class="btn-regresar">
+        <i class="fa-solid fa-arrow-left"></i>
+    </button>
+</form>
+
+{% for sensor in sensores %}
+
+        <!--
+        <div class="botonesAcciones">
+            <a href="#" onclick="abrirModalEditar({
+                id: '{{ sensor.id }}',
+                sensorID: '{{ sensor.sensor.sensorID }}',
+                ubicacionSensor: '{{ sensor.ubicacionSensor }}',
+                medicionBase: '{{ sensor.medicionBase }}',
+                limiteDiario: '{{ sensor.limiteDiario }}',
+                umbralAlerta: '{{ sensor.umbralAlerta }}',
+                tiempoMinutos: '{{ sensor.tiempoMinutos }}'
+            })"><i class="fa-solid fa-gear"></i></a>
+            <a href="#" onclick="confirmdelete('{{sensor.id}}')">
+            <i class="fa-solid fa-trash"></i>
+            </a>
+        </div>
+        -->
+
+
+<div class="contenedorSensores">
+    <div class="misSensores posicionTarjeta">
+        <div class="fechaTarjeta">
+            📅 Fecha de inscripción: {{ sensor.sensor.fechaInscripcion|date:"d/m/Y" }}
+        </div>
+        <br>
+        <div class="sensoresEcnontrados">
+            <h3><img src="{% static 'pwa/img/velocimetro.png'%}" alt="">   Medidor #{{ sensor.sensor.sensorID }}</h3>
+        <p><em>Su ubicación:</em></p>
+        </div>
+        <div class="botonesAcciones">
+            <a href="#" onclick="mostrarMapaSensor('{{ sensor.latitud_clean }}','{{ sensor.longitud_clean }}','{{ sensor.sensorID_clean }}')">
+                <i style="color: aqua !important;" class="fa-solid fa-location-dot"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+
+{% empty %}
+<div class="contenedorVacio">
+    <div class="mensajeVacio">
+        <i class="fa-solid fa-circle-info"></i>
+        <p style="color: black !important;">No hay medidores asignados aún. Solicite su medidor ahora.</p>
+
+        <div class="mt-3 p-2 text-start" style="font-size: 14px;">
+            👉 Para recibir el formato de solicitud en Telegram:
+            <ol class="mb-1">
+                <li>Busque su <strong>chat ID</strong> en <a href="https://t.me/userinfobot" target="_blank" style="color: aqua !important;">@userinfobot</a>.</li>
+                <li>Luego, inicie una conversación con nuestro bot <a href="https://t.me/MedidorAguaCloudBot" target="_blank" style="color: aqua !important;">@MedidorAguaCloudBot</a>.</li>
+            </ol>
+        </div>
+
+        <input type="text" id="chat_id_input" placeholder="Ingrese su Chat ID de Telegram" class="form-control mt-2" />
+
+        <button class="btn btn-primary mt-2" onclick="enviarCertificadoTelegram()"> <i class="fab fa-telegram-plane"></i> Enviar Certificado</button>
+
+        <div id="mensajeEnviando" class="text-muted mt-2" style="display: none;">
+            <i class="fa fa-spinner fa-spin"></i> Enviando certificado a Telegram...
+        </div>
+    </div>
+</div>
+
+{% endfor %}
+
+
+
+
+<div class="modal fade" id="mapModal" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 style="color: black !important;" class="modal-title" id="mapModalLabel">Ubicación del Medidor </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <div id="map" style="height: 400px; width: 100%;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    function mostrarMapaSensor(lat, lng, sensorID) {
+        // Mostrar el modal
+        const modal = new bootstrap.Modal(document.getElementById('mapModal'));
+        document.getElementById('mapModalLabel').textContent = `Ubicación del Medidor # ${sensorID}`;
+
+        modal.show();
+
+
+        setTimeout(() => {
+            const ubicacion = { lat: parseFloat(lat), lng: parseFloat(lng) };
+
+            const map = new google.maps.Map(document.getElementById("map"), {
+                center: ubicacion,
+                zoom: 16
+            });
+
+            new google.maps.Marker({
+                position: ubicacion,
+                map: map,
+                title: `Medidor #${sensorID}`
+            });
+        }, 500);
+    }
+</script>
+
+
+
+
+<!--
+<h3>Historial de límites configurados:</h3>
+<ul>
+    {% for limite in limites %}
+        <li>{{ limite.usuarioSensor.sensor.nombreSensor }} - {{  limite.usuarioSensor.sensor.ubicacionSensor }}: {{ limite.limiteDiario }} L - Umbral {{ limite.umbralAlerta }}% ({{ limite.fechaCambio }})</li>
+    {% empty %}
+        <li>No hay configuraciones aún.</li>
+    {% endfor %}
+</ul>
+-->
+
+
+<div id="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#00000099;">
+    <div class="divPrincipal" style="background:white; margin:auto auto; padding:20px; width:30%; border-radius:10px; position:relative; height: 90%;">
+        <h3 id="modal-title">Asignar nuevo sensor</h3>
+        <form class="agregarNuevoSensor" id="sensorForm" method="POST" data-usuario-id="{{ usuario_id }}" action="{% url 'crearNuevoUsuarioSesor' 0 %}">
+            {% csrf_token %}
+            <label for="sensor">Identificador único del sensor:</label>
+            <input type="text" name="sensor_id" id="sensor_id_input" required>
+
+            <label for="ubicacion">Ubicación donde estará el sensor:</label>
+            <input type="text" name="ubicacion" id="ubicacion_editar" required>
+
+            <label for="medicionBase">Medición base:</label>
+            <input type="text" step="0.01" name="medicionBase" id="medicion_editar" required>
+
+            <label for="limite">Límite Diario (Litros):</label>
+            <input type="text" step="0.01" name="limiteDiario" id="limite_editar" required>
+
+            <label for="umbral">Límite máximo de consumo (Litros):</label>
+            <input type="text" step="0.01" name="umbralAlerta" id="umbral_editar" required>
+
+            <label for="tiempo">Tiempo de generación de alertas (minutos):</label>
+            <input type="text" step="0.01" name="tiempo" id="tiempo_editar" required>
+
+            <button type="submit">Enviar datos</button>
+            <button type="button" onclick="document.getElementById('modal').style.display='none'">Cancelar</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        setTimeout(() => {
+            const faded = document.querySelectorAll(".fade");
+            faded.forEach(el => el.classList.remove("fade"));
+        }, 600);
+    });
+</script>
+
+<script>
+function abrirModalAgregar(usuarioId) {
+    const form = document.getElementById('sensorForm');
+    const userId = usuarioId || form.getAttribute("data-usuario-id");
+
+    const baseUrl = form.getAttribute("action"); // e.g., /limiteUsuario/nuevoUsuarioSensor/0
+    form.action = baseUrl.replace(/0$/, userId);
+    // Limpia los campos
+    document.getElementById('modal-title').innerText = "Asignar nuevo sensor";
+    document.getElementById('sensorForm').action = `/limiteUsuario/nuevoUsuarioSensor/${usuarioId}`;
+    document.getElementById('sensor_id_input').value = "";
+    document.getElementById('sensor_id_input').readOnly = false;
+    document.getElementById('ubicacion_editar').value = "";
+    document.getElementById('medicion_editar').value = "";
+    document.getElementById('limite_editar').value = "";
+    document.getElementById('umbral_editar').value = "";
+    document.getElementById('tiempo_editar').value = "";
+
+    document.getElementById('modal').style.display = 'block';
+}
+
+function abrirModalEditar(sensor) {
+
+    // Llena los campos
+    document.getElementById('modal-title').innerText = "Editar configuración del sensor";
+    document.getElementById('sensorForm').action = `/limiteUsuario/editarUsuarioSensor/${sensor.id}`; // Asegúrate de tener esta vista
+    document.getElementById('sensor_id_input').value = sensor.sensorID;
+    document.getElementById('sensor_id_input').readOnly = true;
+
+    document.getElementById('ubicacion_editar').value = sensor.ubicacionSensor;
+    document.getElementById('medicion_editar').value = sensor.medicionBase;
+    document.getElementById('limite_editar').value = sensor.limiteDiario;
+    document.getElementById('umbral_editar').value = sensor.umbralAlerta;
+    document.getElementById('tiempo_editar').value = sensor.tiempoMinutos;
+
+    document.getElementById('modal').style.display = 'block';
+}
+</script>
+
+<script>
+    const eliminarUrlBase = "{% url 'eliminar_usuario_sensor' 0 %}".slice(0, -2);
+    function confirmdelete(id) {
+        Swal.fire({
+            title: "CONFIRMACIÓN",
+            text: "¿Está seguro de eliminar este sensor? Todos los datos asociados serán eliminados definitivamente",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Sí, eliminar",
+            cancelButtonText: "Cancelar"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = eliminarUrlBase + id + "/";
+            }
+        });
+    }
+</script>
+
+
+
+<script>
+    async function enviarCertificadoTelegram() {
+        const chatId = document.getElementById('chat_id_input').value.trim();
+        const mensajeDiv = document.getElementById('mensajeEnviando');
+
+        if (!chatId) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Chat ID requerido',
+                text: 'Por favor ingrese un Chat ID de Telegram válido.'
+            });
+            return;
+        }
+
+        const mensaje = `📄 *Certificado de Medidor*\n\nAquí está su certificado solicitado.`;
+
+        try {
+            // Mostrar mensaje de "Enviando..."
+            mensajeDiv.style.display = 'block';
+
+            const response = await fetch('/limiteUsuario/enviarPDF/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    pdf_url: '/static/pwa/cert/tramite.pdf',
+                    chat_id: chatId,
+                    mensaje: mensaje
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.status === 'success') {
+                Swal.fire({
+                    title: "¡Enviado!",
+                    text: "El certificado fue enviado a su Telegram.",
+                    icon: "success"
+                });
+            } else {
+                throw new Error(result.message || 'No se pudo enviar');
+            }
+        } catch (error) {
+            Swal.fire({
+                title: "Error",
+                text: "Ocurrió un error al enviar: " + error.message,
+                icon: "error"
+            });
+            console.error("Error:", error);
+        } finally {
+            // Ocultar mensaje de "Enviando..." al finalizar
+            mensajeDiv.style.display = 'none';
+        }
+    }
+</script>
+
+
+
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends 'layouts/masteradmin.html' %}
+{% load static %}
+{% block content %}
+<div class="container py-4 d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="w-100" style="max-width: 500px;">
+        <div class="card shadow-sm">
+            <div class="card-header bg-warning text-dark text-center">
+                <h2 class="mb-0 py-2"><i class="fa-solid fa-pen-to-square"></i> Editar Tipo de Mensaje</h2>
+            </div>
+            <div class="card-body px-4 py-4">
+                <form method="post" id="editar-tipo-mensaje">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="tipoAlerta" class="form-label">Tipo Alerta:</label>
+                        <input type="text" name="tipoAlerta" id="tipoAlerta" class="form-control" value="{{ tipo.tipoAlerta }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="mensaje_default" class="form-label">Mensaje por defecto:</label>
+                        <textarea name="mensaje_default" id="mensaje_default" class="form-control" rows="3" required>{{ tipo.mensaje_default }}</textarea>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-warning text-white">
+                            <i class="fa-solid fa-save"></i> Guardar Cambios
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $("#editar-tipo-mensaje").validate({
+        rules: {
+            tipoAlerta: {
+                required: true,
+                minlength: 3
+            },
+            mensaje_default: {
+                required: true,
+                minlength: 5
+            }
+        },
+        messages: {
+            tipoAlerta: {
+                required: "Por favor, ingrese el tipo de alerta.",
+                minlength: "El tipo de alerta debe tener al menos 3 caracteres."
+            },
+            mensaje_default: {
+                required: "Por favor, ingrese un mensaje por defecto.",
+                minlength: "El mensaje debe tener al menos 5 caracteres."
+            }
+        }
+    });
+</script>
+{% endblock %}

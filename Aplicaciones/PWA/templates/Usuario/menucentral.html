@@ -1,0 +1,29 @@
+{% extends 'layouts/baseSesionIniciada.html' %}
+{% load static%}
+
+{% block linksCss %}
+
+{% endblock %}
+
+{% block title %}Menú Central{% endblock %}
+{% block seccion %}Menú Central{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'pwa/css/menuCentral.css' %}">
+<div class="contenidoCentral">
+    <h2>Bienvenido, {{ nombre_usuario }}</h2>
+    <div class="elementosMenuCentral">
+        <a href="{% url 'ver_notificaciones_por_usuario' usuario_id %}"> <img src="{% static 'pwa/img/notificacion.png'%}" style="width: 32px; height: auto;"></i> Mis Notificaciones</a>
+
+        <a href="{% url 'presentar_limite_usuario' usuario_id %}"><img src="{% static 'pwa/img/medidor.png'%}" style="width: 32px; height: auto;"> Mis Medidores</a>
+        <a href="{% url 'estadisticaPresenracion' usuario_id %}"><img src="{% static 'pwa/img/analitica.png'%}" style="width: 32px; height: auto;"> Mis Estadíticas</a>
+    </div>
+</div>
+
+<div class="mainButtons">
+    <a href="#" onclick="confirm()"><i class="fa-solid fa-right-from-bracket"></i></a>
+</div>
+
+
+
+{% endblock %}

@@ -1,0 +1,139 @@
+{% extends 'layouts/masteradmin.html' %}
+
+{% load static %}
+
+{% block tittle %}
+<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+    <h2 class="mb-3"><i class="fa-solid fa-bell"></i> Notificaciones Recientes</h2>
+
+</div>
+{% endblock %}
+
+
+
+{% block content %}
+
+<div class="content">
+    <div class="d-flex justify-content-between align-items-center mb-3 mt-5">
+        <div>
+            <p class="mb-0">Total registros: {{ notificaciones|length }}</p>
+            <a href="{% url 'agregar_notificacion' %}" class="btn btn-success">
+                <i class="fa-solid fa-plus"></i> Agregar Notificación
+            </a>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table id="tabla-notificaciones" class="table table-striped table-bordered align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Mensaje</th>
+                    <th>Fecha</th>
+                    <th>Usuario</th>
+                    <th>Sensor</th>
+                    <th>Tipo</th>
+                    <th>Acciones</th>
+                </tr>
+                
+            </thead>
+            <tbody>
+                {% for n in notificaciones %}
+                <tr>
+                    <td>{{ n.id }}</td>
+                    <td>{{ n.mensaje|default:"-" }}</td>
+                    <td>{{ n.fechaEnvio|date:"Y-m-d H:i"|default:"-" }}</td>
+                    <td>
+                        {% if n.usuarioSensor and n.usuarioSensor.usuario %}
+                            {{ n.usuarioSensor.usuario.nombreUsuario|default:"-" }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if n.usuarioSensor and n.usuarioSensor.sensor %}
+                            {{ n.usuarioSensor.sensor.sensorID|default:"-" }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if n.tipoMensaje %}
+                            {{ n.tipoMensaje.tipoAlerta|default:"-" }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'editar_notificacion' n.id %}" 
+                            class="btn btn-primary btn-sm mb-1">
+                            <i class="fa-solid fa-pen-to-square"></i> Editar
+                        </a>
+                        <a href="{% url 'eliminar_notificacion' n.id %}" 
+                        class="btn btn-danger btn-sm delete-button">
+                            <i class="fa-solid fa-trash"></i> Eliminar
+                        </a>
+
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center">
+                        No hay notificaciones registradas.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.delete-button').forEach(function (boton) {
+            boton.addEventListener('click', function (e) {
+                e.preventDefault();
+                const urlEliminar = this.getAttribute('href');
+
+                Swal.fire({
+                    title: '¿Eliminar notificación?',
+                    text: 'Una vez eliminada, no podrá recuperarse.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Sí, eliminar',
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = urlEliminar;
+                    }
+                });
+            });
+        });
+    });
+</script>
+
+
+
+
+<script>
+$(document).ready(function() {
+    $('#tabla-notificaciones').DataTable({
+        responsive: true,
+        dom: 'Bfrtip',
+        buttons: [
+            { extend: 'copy', text: '<i class="fa fa-copy"></i> Copiar' },
+            { extend: 'csv', text: '<i class="fa fa-file-csv"></i> CSV' },
+            { extend: 'excel', text: '<i class="fa fa-file-excel"></i> Excel' },
+            { extend: 'pdf', text: '<i class="fa fa-file-pdf"></i> PDF' },
+            { extend: 'print', text: '<i class="fa fa-print"></i> Imprimir' }
+        ],
+        language: {
+            url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json'
+        }
+    });
+});
+</script>
+
+{% endblock %}

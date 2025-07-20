@@ -1,0 +1,171 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="{% static 'pwa/manifest.json' %}?v=8">
+
+    <meta name="theme-color" content="#02fcfc">
+    <link rel="shortcut icon" href="{% static 'pwa/img/logo.avif' %}" type="image/x-icon">
+
+
+
+    {% block linksCss %}{% endblock %}
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+
+
+    <!-- Importando jquery validation -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.js" ></script>
+    <!-- Importando SweetAlert -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Importando archivos js de bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Importar css de bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Importando iconos de font awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <!-- importando datatables-->
+    <link rel="stylesheet" href="//cdn.datatables.net/2.3.1/css/dataTables.dataTables.min.css">
+    <script src="//cdn.datatables.net/2.3.1/js/dataTables.min.js"></script>
+
+    <!-- Botones de exportación (versión compatible) -->
+    <script src="https://cdn.datatables.net/buttons/2.3.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.1/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.1/js/buttons.print.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.3.1/css/buttons.dataTables.min.css">
+
+
+    <!-- Librerías para exportación -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+
+    <title>{% block title %}AquAlert{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'pwa/css/main.css' %}">
+    <link rel="stylesheet" href="{% static 'pwa/css/themedark.css' %}">
+
+</head>
+<body>
+
+    <style>
+        html, body, h1, h2, h3 {
+            font-family: 'Montserrat', sans-serif;
+        }
+
+    </style>
+
+
+    <header>
+        <h1 class="tituloCentral titleFade">AquAlert 💧 {% block seccion %}{% endblock %}</h1>
+        <hr>
+            <div class="theme-switch-wrapper">
+                <label class="switch theme-switch">
+                    <input type="checkbox" class="bsc" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+    </header>
+    <main class="fade">
+
+
+            <div class="contenedorMain">    
+                
+                
+                {% block content %}
+
+                {% endblock %}
+            </div>
+
+    </main>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register("{% static 'pwa/js/serviceworker.js' %}")
+            .then(reg => console.log("✅ SW registrado:", reg))
+            .catch(err => console.error("❌ Error al registrar SW", err));
+        }
+
+    </script>
+
+
+
+    {% if messages %}
+    {% for message in messages %}
+        <script>
+        Swal.fire({
+
+            title: "{% if message.tags == 'error' %}¡ERROR!{% else %}¡ÉXITO!{% endif %}",
+            
+            text: "{{ message }}",
+
+            icon: "{% if message.tags == 'error' %}error{% else %}success{% endif %}"
+
+        });
+        </script>
+    {% endfor %}
+    {% endif %}
+
+    <script>
+    function confirm() {
+        Swal.fire({
+            title: "CONFIRMACIÓN",
+            text: "¿Está seguro de cerrar la sesión?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Sí, cerrar",
+            cancelButtonText: "Cancelar"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = "{% url 'cerrar_sesion' %}";
+            }
+        });
+    }
+    </script>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const toggle = document.querySelector('.bsc');
+    const body = document.body;
+
+    const modoGuardado = localStorage.getItem('modoVisual');
+
+    if (modoGuardado === 'oscuro') {
+        body.classList.add('oscuro');
+        toggle.checked = true;
+    } else {
+        body.classList.add('claro');
+        toggle.checked = false;
+    }
+
+    toggle.addEventListener('change', function () {
+        if (this.checked) {
+            body.classList.remove('claro');
+            body.classList.add('oscuro');
+            localStorage.setItem('modoVisual', 'oscuro');
+        } else {
+            body.classList.remove('oscuro');
+            body.classList.add('claro');
+            localStorage.setItem('modoVisual', 'claro');
+        }
+    });
+});
+</script>
+
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBNmZyqL59rxQ0aGx_Hj3NrPF6pDY76uhk&libraries=geometry&callback=initMap"></script>
+
+
+</body>
+</html>
+

@@ -1,0 +1,55 @@
+{% extends 'layouts/masteradmin.html' %}
+
+{% load static %}
+{% block content %}
+
+<div class="container py-4 d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="w-100" style="max-width: 400px;">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white text-center">
+                <h2 class="mb-0 py-2"><i class="fa-solid fa-pen-to-square"></i> Editar Consumo Dinámico</h2>
+            </div>
+            <div class="card-body px-4 py-4">
+                <form method="post" id="editar-consumo-dinamico">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="consumoDinamico" class="form-label">Consumo (L):</label>
+                        <input type="number" step="0.01" name="consumoDinamico" id="consumoDinamico" class="form-control" value="{{ consumo }}" required>
+                    </div>
+                    <center>
+                        <a href="{% url 'lista_consumo_dinamico' %}" class="btn btn-secondary">
+                            <i class="fa-solid fa-arrow-left"></i> Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa-solid fa-save"></i> Guardar Cambios
+                        </button>
+                    </center>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $("#editar-consumo-dinamico").validate({
+        rules:{
+            consumoDinamico: {
+                required: true,
+                number: true,
+                min: 0,
+                max: 50.00
+            }
+        },
+
+        messages:{
+            consumoDinamico: {
+                required: "Por favor, ingrese el consumo dinámico.",
+                number: "El consumo debe ser un número válido.",
+                min: "El consumo no puede ser negativo.",
+                max: "El consumo no puede exceder 50 litros"
+            }
+        }
+    });
+</script>
+{% endblock %}

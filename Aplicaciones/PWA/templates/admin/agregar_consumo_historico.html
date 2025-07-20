@@ -1,0 +1,129 @@
+{% extends 'layouts/masteradmin.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container py-4 d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="w-100" style="max-width: 600px;">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white text-center">
+                <h2 class="mb-0 py-2"><i class="fa-solid fa-plus"></i> Agregar Consumo Histórico</h2>
+            </div>
+            <div class="card-body px-4 py-4">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="post" id="form-agregar-historico">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="consumoTotal" class="form-label">Consumo Total (L):</label>
+                        <input type="number" step="0.01" name="consumoTotal" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="maxConsumo" class="form-label">Consumo Máximo (L):</label>
+                        <input type="number" step="0.01" name="maxConsumo" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="minConsumo" class="form-label">Consumo Promédio (L):</label>
+                        <input type="number" step="0.01" name="minConsumo" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="fechaPeriodo" class="form-label">Fecha del Periodo:</label>
+                        <input type="date" name="fechaPeriodo" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="usuarioSensor" class="form-label">Usuario - Medidor:</label>
+                        <select name="usuarioSensor" class="form-select" required>
+                            <option value="">Seleccione una opción</option>
+                            {% for us in usuarios_sensores %}
+                                <option value="{{ us.id }}">{{ us.usuario.nombreUsuario }} - {{ us.sensor.sensorID }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa-solid fa-floppy-disk"></i> Guardar
+                        </button>
+                        <a href="{% url 'lista_consumo_historico' %}" class="btn btn-secondary">
+                            <i class="fa-solid fa-arrow-left"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Método personalizado para validar rango de fechas
+    $.validator.addMethod("fechaRango", function(value, element) {
+        if (!value) return false;
+
+        const fechaIngresada = new Date(value);
+        const hoy = new Date();
+        const seisMesesAtras = new Date();
+        seisMesesAtras.setMonth(hoy.getMonth() - 6);
+
+        // Normalizar (eliminar hora)
+        fechaIngresada.setHours(0, 0, 0, 0);
+        hoy.setHours(0, 0, 0, 0);
+        seisMesesAtras.setHours(0, 0, 0, 0);
+
+        return fechaIngresada <= hoy && fechaIngresada >= seisMesesAtras;
+    }, "La fecha debe estar entre hoy y hasta 6 meses atrás.");
+
+    // Inicializar validación del formulario
+    $(document).ready(function () {
+        $("#form-agregar-historico").validate({
+            rules: {
+                consumoTotal: { required: true, number: true, min: 0.01, max: 5000 },
+                maxConsumo: { required: true, number: true, min: 0.01, max: 100 },
+                minConsumo: { required: true, number: true, min: 0.01, max: 200 },
+                fechaPeriodo: { required: true, fechaRango: true },
+                usuarioSensor: { required: true }
+            },
+            messages: {
+                consumoTotal: {
+                    required: "Ingrese el consumo total.",
+                    number: "Debe ser un número válido.",
+                    min: "Debe ser mayor a 0.",
+                    max: "No puede superar los 5000 litros."
+                },
+                maxConsumo: {
+                    required: "Ingrese el consumo máximo.",
+                    number: "Debe ser un número válido.",
+                    min: "Debe ser mayor a 0.",
+                    max: "No puede superar los 100 litros."
+                },
+                minConsumo: {
+                    required: "Ingrese el consumo mínimo.",
+                    number: "Debe ser un número válido.",
+                    min: "Debe ser mayor a 0.",
+                    max: "No puede superar los 200 litros."
+                },
+                fechaPeriodo: {
+                    required: "Seleccione la fecha del periodo.",
+                    fechaRango: "La fecha debe estar entre hoy y hasta 6 meses atrás."
+                },
+                usuarioSensor: {
+                    required: "Seleccione un usuario y medidor."
+                }
+            },
+            errorElement: "div",
+            errorClass: "invalid-feedback",
+            highlight: function(element) {
+                $(element).addClass('is-invalid');
+            },
+            unhighlight: function(element) {
+                $(element).removeClass('is-invalid');
+            }
+        });
+    });
+</script>
+
+
+{% endblock %}

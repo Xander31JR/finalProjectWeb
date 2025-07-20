@@ -1,0 +1,315 @@
+{% extends 'layouts/admin.html' %}
+{% load static %}
+{% block content %}
+        
+    <div class="container py-4">
+        
+        <h1 class="text-center mb-4"><i class="fa-solid fa-user-shield"></i> Panel de Administración Profunda</h1>
+
+        <!-- Tabla Consumo Estático-->
+        <h2 class="mb-3 mt-5"><i class="fa-solid fa-gauge"></i> Consumo Estático</h2>
+        <div class="table-responsive mb-4">
+            <table id="tabla-estatico" class="table table-striped table-bordered align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Consumo</th>
+                        <th>Fecha Corte</th>
+                        <th>UsuarioSensor</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in consumos_estaticos %}
+                    <tr>
+                        <td>{{ c.id }}</td>
+                        <td>{{ c.consumoEstatico }}</td>
+                        <td>{{ c.fechaCorte }}</td>
+                        <td>{{ c.usuarioSensor }}</td>
+                        <td>
+                            <a href="{% url 'editar_consumo_estatico' c.id %}" class="btn btn-primary btn-sm mb-1">
+                                <i class="fa-solid fa-pen-to-square"></i> Editar
+                            </a>
+                            <a href="{% url 'eliminar_consumo_estatico' c.id %}" class="btn btn-danger btn-sm delete-button mb-1">
+                                <i class="fa-solid fa-trash"></i> Eliminar
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+
+        <!-- Tabla Consumo Dinámico -->
+        <h2 class="mb-3 mt-5"><i class="fa-solid fa-bolt"></i> Consumo Dinámico</h2>
+        <div class="table-responsive mb-4">
+            <table id="tabla-dinamico" class="table table-striped table-bordered align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Consumo</th>
+                        <th>Fecha Corte</th>
+                        <th>UsuarioSensor</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in consumos_dinamicos %}
+                    <tr>
+                        <td>{{ c.id }}</td>
+                        <td>{{ c.consumoDinamico }}</td>
+                        <td>{{ c.fechaCorte }}</td>
+                        <td>{{ c.usuarioSensor }}</td>
+                        <td>
+                            <a href="{% url 'editar_consumo_dinamico' c.id %}" class="btn btn-primary btn-sm mb-1">
+                                <i class="fa-solid fa-pen-to-square"></i> Editar
+                            </a>
+                            <a href="{% url 'eliminar_consumo_dinamico' c.id %}" class="btn btn-danger btn-sm delete-button mb-1">
+                                <i class="fa-solid fa-trash"></i> Eliminar
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Tabla Consumo historico -->
+       <h2 class="mb-3 mt-5"><i class="fa-solid fa-clock-rotate-left"></i> Consumo Histórico</h2>
+        <div class="table-responsive mb-4">
+            <table id="tabla-historico" class="table table-striped table-bordered align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Total</th>
+                        <th>Máx</th>
+                        <th>Mín</th>
+                        <th>Periodo</th>
+                        <th>UsuarioSensor</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in consumos_historicos %}
+                    <tr>
+                        <td>{{ c.id }}</td>
+                        <td>{{ c.consumoTotal }}</td>
+                        <td>{{ c.maxConsumo }}</td>
+                        <td>{{ c.minConsumo }}</td>
+                        <td>{{ c.fechaPeriodo }}</td>
+                        <td>{{ c.usuarioSensor }}</td>
+                        <td>
+                            <a href="{% url 'editar_consumo_historico' c.id %}" class="btn btn-primary btn-sm mb-1">
+                                <i class="fa-solid fa-pen-to-square"></i> Editar
+                            </a>
+                            <a href="{% url 'eliminar_consumo_historico' c.id %}" class="btn btn-danger btn-sm delete-button mb-1">
+                                <i class="fa-solid fa-trash"></i> Eliminar
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Tabla de Límites de Usuario -->
+        <h2 class="mb-3 mt-5"><i class="fa-solid fa-bell"></i> Límites de Usuario</h2>
+        <div class="table-responsive mb-4">
+            <table id="tabla-limite" class="table table-striped table-bordered align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Límite Diario</th>
+                        <th>Umbral Alerta</th>
+                        <th>Tiempo (min)</th>
+                        <th>Fecha Cambio</th>
+                        <th>UsuarioSensor</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for l in limites %}
+                    <tr>
+                        <td>{{ l.id }}</td>
+                        <td>{{ l.limiteDiario }}</td>
+                        <td>{{ l.umbralAlerta }}</td>
+                        <td>{{ l.tiempoMinutos }}</td>
+                        <td>{{ l.fechaCambio }}</td>
+                        <td>{{ l.usuarioSensor }}</td>
+                        <td>
+                            <a href="{% url 'editar_limite_usuario' l.id %}" class="btn btn-primary btn-sm mb-1">
+                                <i class="fa-solid fa-pen-to-square"></i> Editar
+                            </a>
+                            <a href="{% url 'eliminar_limite_usuario' l.id %}" class="btn btn-danger btn-sm delete-button mb-1">
+                                <i class="fa-solid fa-trash"></i> Eliminar
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+
+        <h2 class="mb-3 mt-5"><i class="fa-solid fa-book"></i> Logs de Usuario</h2>
+        <div class="table-responsive mb-4">
+            <table id="tabla-logs" class="table table-striped table-bordered align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Evento</th>
+                        <th>Descripción</th>
+                        <th>Fecha Cambio</th>
+                        <th>Usuario</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs %}
+                    <tr>
+                        <td>{{ log.id }}</td>
+                        <td>{{ log.evento }}</td>
+                        <td>{{ log.descripcion }}</td>
+                        <td>{{ log.fechaCambio }}</td>
+                        <td>{{ log.usuario }}</td>
+                        <td>
+                            <a href="{% url 'eliminar_log_usuario' log.id %}" class="btn btn-danger btn-sm delete-button mb-1">
+                                <i class="fa-solid fa-trash"></i> Eliminar
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <h2 class="mb-3 mt-5"><i class="fa-solid fa-bell"></i> Notificaciones</h2>
+        <div class="table-responsive mb-4">
+            <table id="tabla-notificaciones" class="table table-striped table-bordered align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Mensaje</th>
+                        <th>Fecha Envío</th>
+                        <th>Estado</th>
+                        <th>UsuarioSensor</th>
+                        <th>TipoMensaje</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for n in notificaciones %}
+                    <tr>
+                        <td>{{ n.notificacionId }}</td>
+                        <td>{{ n.mensaje }}</td>
+                        <td>{{ n.fechaEnvio }}</td>
+                        <td>{{ n.estado }}</td>
+                        <td>{{ n.usuarioSensorId }}</td>
+                        <td>{{ n.tipoMensajeId }}</td>
+                        <td>
+                            <a href="{% url 'eliminar_notificacion' n.notificacionId %}" class="btn btn-danger btn-sm delete-button mb-1">
+                                <i class="fa-solid fa-trash"></i> Eliminar
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+
+        
+        <h2 class="mb-3 mt-5"><i class="fa-solid fa-message"></i> Tipos de Mensaje</h2>
+        <div class="table-responsive mb-4">
+            <table id="tabla-tipo-mensaje" class="table table-striped table-bordered align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Tipo Alerta</th>
+                        <th>Mensaje Default</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in tipos_mensaje %}
+                    <tr>
+                        <td>{{ t.tipoMensajeId }}</td>
+                        <td>{{ t.tipoAlerta }}</td>
+                        <td>{{ t.mensaje_default }}</td>
+                        <td>
+                            <a href="{% url 'eliminar_tipo_mensaje' t.tipoMensajeId %}" class="btn btn-danger btn-sm delete-button mb-1">
+                                <i class="fa-solid fa-trash"></i> Eliminar
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+
+    </div>
+
+    
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- SweetAlert -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- jQuery Validation -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
+    <!-- DataTables y exportación -->
+    <script src="//cdn.datatables.net/2.3.1/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.1/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.1/js/buttons.print.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+
+    <script>
+    // Confirmación de eliminación con SweetAlert
+    $(document).ready(function() {
+        $('.delete-button').on('click', function(e) {
+            e.preventDefault();
+            const deleteUrl = $(this).attr('href');
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "¡No podrás revertir esto!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sí, eliminarlo!',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = deleteUrl;
+                }
+            });
+        });
+
+        // Inicializar DataTables en todas las tablas
+        $('#tabla-usuarios, #tabla-asignaciones, #tabla-sensores, #tabla-estatico, #tabla-dinamico, #tabla-historico, #tabla-limite, #tabla-logs, #tabla-notificaciones, #tabla-tipo-mensaje').DataTable({
+            responsive: true,
+            dom: 'Bfrtip',
+            buttons: [
+                { extend: 'copy', text: '<i class="fa fa-copy"></i> Copiar' },
+                { extend: 'csv', text: '<i class="fa fa-file-csv"></i> CSV' },
+                { extend: 'excel', text: '<i class="fa fa-file-excel"></i> Excel' },
+                { extend: 'pdf', text: '<i class="fa fa-file-pdf"></i> PDF' },
+                { extend: 'print', text: '<i class="fa fa-print"></i> Imprimir' }
+            ],
+            language: {
+                url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json'
+            }
+        });
+    });
+    </script>
+
+
+        
+{% endblock %}

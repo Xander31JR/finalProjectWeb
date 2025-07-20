@@ -1,0 +1,210 @@
+{% extends 'layouts/baseSesionIniciada.html' %}
+{% load static %}
+
+{% block title %}Mis estadísticas{% endblock %}
+
+{% block seccion %}Mis estadísticas{% endblock %}
+
+
+{% block linksCss %}
+<link rel="stylesheet" href="{% static 'pwa/css/estadisticas.css' %}">
+{% endblock %}
+
+
+
+
+{% block content %}
+
+
+
+
+<div class="botondeRegresoAtras">
+    <form class="formParaRegresarAtras" action="{% url 'menuCentral' %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="usuario_id" value="{{ usuario_id }}">
+        <button class="butonRegresar" type="submit" class="btn-regresar">
+            <i class="fa-solid fa-arrow-left"></i>
+        </button>
+        
+    </form>
+    <h3>📡 Selecciona un sensor:</h3>
+</div>
+
+
+{% for sensor in sensores %}
+<div class="contenedorSensores">
+    <div class="misSensores posicionTarjeta">
+        <div class="fechaTarjeta">
+            📅 Fecha de inscripción: {{ sensor.sensor.fechaInscripcion|date:"d/m/Y" }}
+        </div>
+        <br>
+
+        <div class="sensoresEcnontrados">
+            <h3><img src="{% static 'pwa/img/velocimetro.png'%}" alt="">Medidor #{{ sensor.sensor.sensorID }}</h3>
+            <p><em>Sus estadísticas de consumo:</em></p>
+        </div>
+
+        <div class="botonesAcciones">
+            <a href="#" onclick="mostrarGrafico('{{ sensor.id }}')">
+                <i class="fa-solid fa-chart-simple icono-fijo"></i>
+            </a>
+            <a href="#" onclick="mostrarGraficoPie('{{ sensor.id }}')">
+                <i class="fa-solid fa-chart-pie icono-fijo"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+{% empty %}
+<div class="contenedorVacio">
+    <div class="mensajeVacio">
+        <i class="fa-solid fa-circle-info"></i>
+        <p>No hay medidores registrados aún. Contáctese con la Junta de Agua</p>
+    </div>
+</div>
+
+
+{% endfor %}
+
+
+<div id="modalGrafico" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="cerrar-modal" onclick="cerrarModal()">&times;</span>
+        <canvas id="graficoConsumo" width="800" height="400"></canvas>
+    </div>
+</div>
+
+<div id="modalGraficoPie" class="modal" style="display: none;">
+    <div class="modal-contentPie">
+        <span class="cerrar-modal" onclick="cerrarModalPie()">&times;</span>
+        <canvas id="graficoConsumoPie" width="600" height="400"></canvas>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        setTimeout(() => {
+            const faded = document.querySelectorAll(".fade");
+            faded.forEach(el => el.classList.remove("fade"));
+        }, 600);
+    });
+</script>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+let grafico = null;
+
+function mostrarGrafico(sensorId) {
+    fetch(`/notificaciones/reporte/consumo/${sensorId}/`)
+        .then(response => response.json())
+        .then(data => {
+            const modal = document.getElementById('modalGrafico');
+            modal.style.display = 'flex';
+
+            const ctx = document.getElementById('graficoConsumo').getContext('2d');
+
+            // Si ya existe un gráfico, destruirlo
+            if (grafico) {
+                grafico.destroy();
+            }
+
+            grafico = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.fechas,
+                    datasets: [
+                        {
+                            label: 'Consumo Total (L)',
+                            data: data.consumo_total,
+                            borderColor: 'blue',
+                            fill: false,
+                            tension: 0.1
+                        },
+                        {
+                            label: 'Máximo Consumo (L)',
+                            data: data.maximo,
+                            borderColor: 'orange',
+                            fill: false,
+                            tension: 0.1
+                        },
+                        {
+                            label: 'Promedio (L)',
+                            data: data.promedio,
+                            borderColor: 'green',
+                            fill: false,
+                            tension: 0.1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Histórico de Consumo Diario'
+                        }
+                    }
+                }
+            });
+        });
+}
+
+function cerrarModal() {
+    document.getElementById('modalGrafico').style.display = 'none';
+}
+</script>
+
+
+<script>
+let graficoPie = null;
+
+function mostrarGraficoPie(sensorId) {
+    fetch(`/notificaciones/reporte/consumo/pie/${sensorId}/`)
+        .then(response => response.json())
+        .then(data => {
+            const modal = document.getElementById('modalGraficoPie');
+            modal.style.display = 'flex';
+
+            const ctx = document.getElementById('graficoConsumoPie').getContext('2d');
+
+            // Si ya existe un gráfico anterior, destruirlo
+            if (graficoPie) {
+                graficoPie.destroy();
+            }
+
+            graficoPie = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: data.dias,
+                    datasets: [{
+                        label: 'Consumo Total por Día (L)',
+                        data: data.consumos,
+                        backgroundColor: [
+                            '#3498db', '#e67e22', '#2ecc71',
+                            '#f1c40f', '#9b59b6', '#e74c3c', '#1abc9c'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Distribución Semanal del Consumo'
+                        }
+                    }
+                }
+            });
+        });
+}
+
+function cerrarModalPie() {
+    document.getElementById('modalGraficoPie').style.display = 'none';
+}
+</script>
+
+{% endblock %}

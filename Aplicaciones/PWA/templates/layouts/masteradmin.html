@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static%}
+<head>
+    <meta charset="utf-8">
+    <title>Admin - AquAler</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="" name="keywords">
+    <meta content="" name="description">
+
+
+
+
+
+    <!-- Favicon -->
+    <link href="{% static 'pwa/img/logo.avif' %}" rel="icon">
+
+    <!-- Google Web Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+
+    <!-- Icon Font Stylesheet -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Libraries Stylesheet -->
+    <link href="{% static 'pwa/static/lib/animate/animate.min.css'%}" rel="stylesheet">
+    <link href="{% static 'pwa/static/lib/owlcarousel/assets/owl.carousel.min.css'%}" rel="stylesheet">
+    <link href="{% static 'pwa/static/lib/lightbox/css/lightbox.min.css'%}" rel="stylesheet">
+
+    <!-- Customized Bootstrap Stylesheet -->
+    <link href="{% static 'pwa/static/css/bootstrap.min.css'%}" rel="stylesheet">
+
+    <!-- Template Stylesheet -->
+    <link href="{% static 'pwa/static/css/style.css'%}" rel="stylesheet">
+
+
+
+    <!-- CDNS FUNDAMENTALES -->
+
+
+
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+
+    <!-- Bootstrap Select -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/css/bootstrap-select.min.css">
+
+    <!-- FileInput CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/5.5.4/css/fileinput.min.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+    <!-- DataTables -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.3.1/css/dataTables.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.2.3/css/buttons.dataTables.min.css">
+
+
+
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Bootstrap Select -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/js/bootstrap-select.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/js/i18n/defaults-es_ES.min.js"></script>
+
+    <!-- FileInput -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/5.5.4/js/fileinput.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/5.5.4/js/locales/es.min.js"></script>
+
+    <!-- jQuery Validation -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/additional-methods.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/localization/messages_es.min.js"></script>
+
+    <!-- DataTables -->
+    <script src="https://cdn.datatables.net/2.3.1/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.2.3/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.2.3/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.2.3/js/buttons.print.min.js"></script>
+
+
+
+    <!-- importando datatables-->
+    <link rel="stylesheet" href="//cdn.datatables.net/2.3.1/css/dataTables.dataTables.min.css">
+    <script src="//cdn.datatables.net/2.3.1/js/dataTables.min.js"></script>
+
+    <!-- Botones de exportación (versión compatible) -->
+    <script src="https://cdn.datatables.net/buttons/2.3.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.1/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.1/js/buttons.print.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.3.1/css/buttons.dataTables.min.css">
+
+
+    <!-- Librerías para exportación -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- CDNS FUNDAMENTALES -->
+
+
+
+
+</head>
+
+<body>
+
+    <style>
+        html, body, h1, h2, h3 {
+            font-family: 'Montserrat', sans-serif;
+        }
+
+    </style>
+
+
+    <!-- Spinner (se mantiene igual) -->
+    <div id="spinner" class="show bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
+        <div class="spinner-grow text-primary" style="width: 3rem; height: 3rem;" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+
+    <div class="container-xxl bg-white p-0 d-flex">
+        <!-- Sidebar Start -->
+        <div class="sidebar bg-dark">
+    <div class="sidebar-header p-3">
+        <a href="" class="navbar-brand p-0 text-white">
+            <h1 class="m-0">A² 💧<span class="fs-5"> AquAler</span></h1>
+        </a>
+    </div>
+    <nav class="sidebar-nav">
+        <ul class="nav flex-column">
+
+            <li class="nav-item dropdown {% if admin_active %}active{% endif %}">
+                <a class="nav-link dropdown-toggle" data-bs-toggle="collapse" href="#adminDropdown">
+                    <i class="fa-solid fa-microchip me-2"></i> Adminis... Profunda
+                </a>
+                <div class="collapse {% if admin_active %}show{% endif %}" id="adminDropdown">
+                    <ul class="nav flex-column ms-3">
+                        <li class="nav-item">
+                            <a href="{% url 'lista_consumo_estatico' %}" class="nav-link">
+                                <i class="fa-solid fa-bolt me-2"></i> Lectura Estáticos
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'lista_consumo_dinamico' %}" class="nav-link">
+                                <i class="fa-solid fa-bolt-lightning me-2"></i> Lectura Dinámica
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'lista_consumo_historico' %}" class="nav-link">
+                                <i class="fa-solid fa-clock-rotate-left"></i> Lectura Histórica
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'lista_notificaciones' %}" class="nav-link">
+                                <i class="fa-solid fa-bell me-2"></i> Notificaciones
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'lista_tipo_mensaje' %}" class="nav-link">
+                                <i class="fa-solid fa-bell-concierge me-2"></i> Tipo de Notificac...
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'ver_logs_usuario' %}" class="nav-link">
+                                <i class="fa-solid fa-clipboard-list me-2"></i> Log del usuario
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+
+
+            <li class="nav-item {% if 'icons' in segment %} active {% endif %}">
+                <a href="{% url 'lista_usuario' %}" class="nav-link">
+                    <i class="fa-solid fa-users me-2"></i> Usuarios
+                </a>
+            </li>
+            <li class="nav-item {% if 'map' in segment %} active {% endif %}">
+                <a href="{% url 'lista_sensor' %}" class="nav-link">
+                    <i class="fa-solid fa-gauge-high me-2"></i> Medidores
+                </a>
+            </li>
+            <li class="nav-item {% if 'notifications' in segment %} active {% endif %}">
+                <a href="{% url 'listaAsignacion' %}" class="nav-link">
+                    <i class="fa-solid fa-layer-group me-2"></i> Asignaciones
+                </a>
+            </li>
+            
+            <li class="nav-item dropdown {% if estadisticas_active %}active{% endif %}">
+                <a class="nav-link dropdown-toggle" data-bs-toggle="collapse" href="#estadisticasDropdown">
+                    <i class="fa-solid fa-chart-pie me-2"></i> Estadísticas
+                </a>
+                <div class="collapse {% if estadisticas_active %}show{% endif %}" id="estadisticasDropdown">
+                    <ul class="nav flex-column ms-3">
+                        <li class="nav-item">
+                            <a href="{% url 'admin_estadisticas_geograficas_avanzadas' %}" class="nav-link">
+                                <i class="fa-solid fa-chart-line me-2"></i> Estadísticas Diarias
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'admin-estadisticas_geograficas' %}" class="nav-link">
+                                <i class="fa-solid fa-circle-half-stroke me-2"></i> Estadística Histórica
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+            
+            
+            <div class="sidebar-footer p-3">
+                <a href="{% url 'cerrar_sesion' %}" class="btn btn-primary text-light rounded-pill py-2 px-4 w-100">Cerrar sesion</a>
+            </div>
+                </ul>
+            </nav>
+        </div>
+
+
+
+
+        <div class="main-content">
+            <!-- Top Bar (opcional) -->
+            <div class="top-bar bg-light p-3 d-flex justify-content-between align-items-center">
+                <button class="btn btn-outline-secondary d-md-none" id="sidebarToggle">
+                    <i class="fa fa-bars"></i>
+                </button>
+                    {% block tittle %}
+
+                    {% endblock %}
+                
+                <div style=" visibility: hidden;">
+                    <button type="button" class="btn text-secondary" id="themeToggle">
+                        <i class="fa fa-moon"></i>
+                    </button>
+                </div>
+                
+            </div>
+
+
+            <div class="container-fluid pt-4 px-4">
+                <div class="bg-light rounded p-4">
+                    {% block content %}
+
+                    {% endblock %}
+                </div>
+            </div>
+
+            <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top pt-2"><i class="bi bi-arrow-up"></i></a>
+        </div>
+    </div>
+
+    <!-- JavaScript Libraries -->
+    <script src="{% static 'pwa/static/lib/wow/wow.min.js'%}"></script>
+    <script src="{% static 'pwa/static/lib/easing/easing.min.js'%}"></script>
+    <script src="{% static 'pwa/static/lib/waypoints/waypoints.min.js'%}"></script>
+    <script src="{% static 'pwa/static/lib/owlcarousel/owl.carousel.min.js'%}"></script>
+    <script src="{% static 'pwa/static/lib/isotope/isotope.pkgd.min.js'%}"></script>
+    <script src="{% static 'pwa/static/lib/lightbox/js/lightbox.min.js'%}"></script>
+
+    <!-- Template Javascript -->
+    <script src="{% static 'pwa/staticjs/main.js'%}"></script>
+
+
+    <!-- Google Maps -->
+
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBfGs7bFheV6d7HSt1KWV2kVF0pwa8WepM&callback=initMapAvanzado" async defer></script>
+
+
+    <script>
+        // Toggle sidebar en móviles
+        document.getElementById('sidebarToggle').addEventListener('click', function() {
+            document.querySelector('.sidebar').classList.toggle('active');
+            document.querySelector('.main-content').classList.toggle('active');
+        });
+
+    </script>
+
+    <script>
+        // Ocultar spinner cuando la página cargue
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                var spinner = document.getElementById('spinner');
+                spinner.classList.remove('show');
+                spinner.style.display = 'none';
+            }, 500);
+        });
+    </script>
+
+
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+
+        const modoGuardado = localStorage.getItem('modoVisual');
+
+        // Configuración inicial
+        if (modoGuardado === 'oscuro') {
+            body.classList.add('oscuro');
+            themeToggle.innerHTML = '<i class="fa fa-sun"></i>'; // Cambia a icono de sol
+        } else {
+            body.classList.add('claro');
+            themeToggle.innerHTML = '<i class="fa fa-moon"></i>'; // Mantiene icono de luna
+        }
+
+        // Evento click para cambiar tema
+        themeToggle.addEventListener('click', function () {
+            if (body.classList.contains('oscuro')) {
+                body.classList.remove('oscuro');
+                body.classList.add('claro');
+                localStorage.setItem('modoVisual', 'claro');
+                this.innerHTML = '<i class="fa fa-moon"></i>';
+            } else {
+                body.classList.remove('claro');
+                body.classList.add('oscuro');
+                localStorage.setItem('modoVisual', 'oscuro');
+                this.innerHTML = '<i class="fa fa-sun"></i>';
+            }
+        });
+    });
+
+
+    </script>
+
+
+
+    <script>
+    $(document).ready(function() {
+        let table = new DataTable('#', {
+            language: {
+                url: 'https://cdn.datatables.net/plug-ins/2.3.1/i18n/es-ES.json'
+            },
+            dom: 'Bfrtip',
+            buttons: [
+                'copy',
+                'csv',
+                'excel',
+                'pdf',
+                'print'
+            ]
+        });
+    });
+    </script>
+
+
+    {% if messages %}
+    {% for message in messages %}
+        <script>
+        Swal.fire({
+
+            title: "{% if message.tags == 'error' %}¡ERROR!{% else %}¡ÉXITO!{% endif %}",
+            
+            text: "{{ message }}",
+
+            icon: "{% if message.tags == 'error' %}error{% else %}success{% endif %}"
+
+        });
+        </script>
+    {% endfor %}
+    {% endif %}
+
+
+
+
+
+    <style>
+
+    /* Estilos para el botón de tema */
+    #themeToggle {
+        transition: all 0.3s ease;
+    }
+
+    #themeToggle:hover {
+        transform: scale(1.1);
+    }
+
+    /* Estilos para los modos */
+    .oscuro {
+        background-color: #1a1a1a;
+        color: #ffffff;
+    }
+
+    .claro {
+        background-color: #ffffff;
+        color: #000000;
+    }
+
+    /* Ajustes específicos para el sidebar en modo oscuro */
+    .oscuro .sidebar {
+        background-color: #121212 !important;
+    }
+
+    .oscuro .sidebar .nav-link {
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+
+    .oscuro .sidebar .nav-link:hover, 
+    .oscuro .sidebar .nav-link.active {
+        color: #ffffff !important;
+    }
+
+    
+      .error{
+        color: red;
+      }
+      .form-control.error{
+        border: 1px solid red;
+      }
+    
+
+    </style>
+
+
+
+
+
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBNmZyqL59rxQ0aGx_Hj3NrPF6pDY76uhk&libraries=geometry&callback=initMap"></script>
+
+</body>
+
+</html>

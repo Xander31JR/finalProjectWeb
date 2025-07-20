@@ -1,0 +1,189 @@
+{% extends 'layouts/masteradmin.html' %}
+{% load static %}
+
+
+{% block tittle %}
+<h2 class="mb-3"><i class="fa-solid fa-users"></i> Lista de Asignaciones Actuales</h2>
+{% endblock %}
+
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3 mt-5">
+    <a href="{% url 'nuevoAsignacion' %}" class="btn btn-success">
+        <i class="fa-solid fa-plus"></i> Agregar nueva asignación
+    </a>
+</div>
+        
+<div class="table-responsive">
+    <table id="tabla-asignaciones" class="table table-striped table-bordered align-middle">
+        <thead class="table table-dark">
+            <tr>
+                <th>Usuario</th>
+                <th>Número de medidor</th>
+                <th>Ubicación</th>
+                <th>Fecha de Asignación</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for asignacion in asignaciones %}
+                <tr>
+                    <td>{{ asignacion.usuario.nombreUsuario }}</td>
+                    <td>{{ asignacion.sensor.sensorID}}</td>
+                    <td>
+                        <button type="button" class="btn btn-outline-info btn-sm ms-2"
+                                data-bs-toggle="modal"
+                                data-bs-target="#modalUbicacion{{ asignacion.id }}">
+                            <i class="fa-solid fa-map-location-dot"></i> Ver
+                        </button>
+                    </td>
+
+                    <td>{{ asignacion.fechaAsignacion }}</td>
+                    <td>
+                        <a href="{% url 'editar_asignacion' asignacion.id %}" class="btn btn-primary btn-sm mb-1">
+                            <i class="fa-solid fa-pen-to-square"></i> Editar
+                        </a>
+                        <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#modalEliminar{{ asignacion.id }}">
+                            <i class="fa-solid fa-trash"></i> Eliminar
+                        </button>
+                    </td>
+                </tr>
+
+
+
+                <div class="modal fade" id="modalEliminar{{ asignacion.id }}" tabindex="-1" aria-labelledby="modalLabel{{ asignacion.id }}" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <form method="POST" action="{% url 'eliminar_asignacion' asignacion.id %}">
+                        {% csrf_token %}
+                        <div class="modal-content">
+                            <div class="modal-header bg-danger text-white">
+                                <h5 class="modal-title" id="modalLabel{{ asignacion.id }}">⚠️ Confirmación de Eliminación</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>Estás a punto de eliminar <strong>toda la trazabilidad</strong> asociada a esta asignación:</p>
+                                <ul>
+                                    <li>📊 Lecturas estáticas y dinámicas</li>
+                                    <li>🔔 Notificaciones de alerta</li>
+                                    <li>📉 Límites configurados</li>
+                                </ul>
+                                <p>Esta acción es irreversible. Para continuar, escribe la siguiente frase: <b>Ejecutar eliminación</b></p>
+                                <div class="mb-3">
+                                    <input type="text" class="form-control confirmacionTexto" placeholder="Ejecutar eliminación" required>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-danger btn-confirmar" disabled>Eliminar Definitivamente</button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            </div>
+                        </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="modal fade" id="modalUbicacion{{ asignacion.id }}" tabindex="-1" aria-labelledby="labelUbicacion{{ asignacion.id }}" aria-hidden="true">
+                    <div class="modal-dialog modal-lg modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header bg-info text-white">
+                                <h5 class="modal-title" id="labelUbicacion{{ asignacion.id }}">
+                                    📌 Ubicación del medidor #{{ asignacion.sensor.sensorID }}
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div id="mapa{{ asignacion.id }}" style="height:400px; width:100%; border-radius:8px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+
+
+
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+
+
+
+
+<script>
+document.querySelectorAll('.confirmacionTexto').forEach(function(input) {
+    input.addEventListener('input', function () {
+        const valor = input.value.trim().toLowerCase().normalize("NFKC");
+        const fraseClave = 'ejecutar eliminación'; // en minúsculas también
+
+        const boton = input.closest('.modal-content').querySelector('.btn-confirmar');
+        boton.disabled = (valor !== fraseClave);
+    });
+});
+
+</script>
+
+<script>
+const asignaciones = JSON.parse('{{ asignaciones_js|safe }}');
+
+function renderMapa(id, lat, lng, nombre, ubicacion) {
+    const mapaElemento = document.getElementById("mapa" + id);
+    if (mapaElemento) {
+        const mapa = new google.maps.Map(mapaElemento, {
+            center: { lat: lat, lng: lng },
+            zoom: 17
+        });
+
+        const marcador = new google.maps.Marker({
+            position: { lat: lat, lng: lng },
+            map: mapa,
+            title: "Medidor #" + nombre
+        });
+
+        const info = new google.maps.InfoWindow({
+            content: `<strong>${nombre}</strong><br>${ubicacion}`
+        });
+
+        marcador.addListener("click", () => {
+            info.open(mapa, marcador);
+        });
+    }
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    asignaciones.forEach(asignacion => {
+        const modal = document.getElementById("modalUbicacion" + asignacion.id);
+        modal.addEventListener("shown.bs.modal", function () {
+            renderMapa(asignacion.id, asignacion.latitud, asignacion.longitud, asignacion.sensorID, asignacion.ubicacion);
+        });
+    });
+});
+</script>
+
+<script>
+$(document).ready(function() {
+        $('#tabla-asignaciones').DataTable({
+            responsive: true,
+            dom: 'Bfrtip',
+            buttons: [
+                { extend: 'copy', text: '<i class="fa fa-copy"></i> Copiar' },
+                { extend: 'csv', text: '<i class="fa fa-file-csv"></i> CSV' },
+                { extend: 'excel', text: '<i class="fa fa-file-excel"></i> Excel' },
+                { extend: 'pdf', text: '<i class="fa fa-file-pdf"></i> PDF' },
+                { extend: 'print', text: '<i class="fa fa-print"></i> Imprimir' }
+            ],
+            language: {
+                url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json'
+            }
+        });
+    });
+</script>
+
+
+
+
+
+
+
+{% endblock %}
+        
