@@ -56,7 +56,7 @@
 
 
 <script>
-function initMapAvanzado() {
+function initMap() {
   const mapa = new google.maps.Map(document.getElementById("mapaAvanzado"), {
     center: { lat: -0.7415954958310084, lng: -78.64123031371885 },
     zoom: 14.5,
@@ -117,6 +117,10 @@ function initMapAvanzado() {
     });
 }
 </script>
+
+
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBNmZyqL59rxQ0aGx_Hj3NrPF6pDY76uhk&libraries=geometry&callback=initMap"></script>
+
 
 
 {% endblock  %}
