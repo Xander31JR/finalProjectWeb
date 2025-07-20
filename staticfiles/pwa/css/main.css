@@ -1,0 +1,210 @@
+*{
+    font-family: 'Montserrat';
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body, main {
+    height: 100%;
+}
+
+
+
+
+.mainContent{
+    display: flex;
+    flex-direction: column;
+    width: 80%;
+    gap: 10px;
+    margin-top: 10px;
+    align-items: center;
+}
+.sutitulo{
+    color: aqua;
+    font-family: inherit;
+}
+
+
+
+
+header{
+    width: 100%;
+    text-align: center;
+}
+
+main {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    max-height: 85vh;
+}
+
+
+.contenedorMain{
+
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+
+}
+
+    
+
+.tituloCentral{
+    font-family: 'Montserrat';
+    padding: 10px;
+    
+}
+
+
+
+
+
+
+
+.mainButtons {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        display: flex;
+        justify-content: space-around; 
+        direction: rtl;
+        padding: 10px 20px;
+        z-index: 999; 
+    }
+
+
+    .mainButtons a {
+        color: #fff;
+        font-size: 0.7rem;
+        padding: 15px;
+        border-radius: 100%;
+        background-color: rgb(190, 4, 4);
+        box-shadow: 0 0 10px 0 rgb(190, 4, 4);
+    }
+
+    .butonRegresar{
+        padding: 15px;
+        font-size: 0.7rem;
+        color: #fff;
+        background-color: aqua;
+        border: 1px solid aqua;
+        border-radius: 100%;
+        box-shadow: 0 0 10px 0 aqua;
+    
+    }   
+
+
+
+
+    .mainButtons {
+
+        justify-content: center; 
+    }
+
+@media screen and (max-width: 600px) {
+    .tituloCentral{
+        font-size: 1.3rem;
+    }
+
+    .mainButtons {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        display: flex;
+        justify-content: space-around; 
+        direction: rtl;
+        padding: 10px 20px;
+        z-index: 999; 
+    }
+
+
+    .mainButtons a {
+        color: #fff;
+        font-size: 0.7rem;
+        padding: 15px;
+        border-radius: 100%;
+        background-color: rgb(190, 4, 4);
+        box-shadow: 0 0 10px 0 rgb(190, 4, 4);
+    }
+
+    .butonRegresar{
+        padding: 15px;
+        font-size: 0.7rem;
+        color: #fff;
+        background-color: aqua;
+        border: 1px solid aqua;
+        border-radius: 100%;
+        box-shadow: 0 0 10px 0 aqua;
+    
+    }   
+
+
+
+
+    .mainButtons {
+
+        justify-content: left; 
+    }
+
+
+}
+
+.titleFade{
+    animation: fade 0.6s ease-out forwards;
+}
+
+
+.fade {
+    animation: aparecerSuavemente 0.6s ease-out forwards;
+}
+
+
+
+.tituloFinal {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.6s ease-in-out, visibility 0s linear 0.6s;
+}
+
+.tituloInicial {
+    animation: zoomInOut 1s ease-in-out forwards;
+}
+
+@keyframes zoomInOut {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.2); }
+    100% { opacity: 0; }
+}
+
+
+
+
+
+
+@keyframes aparecerSuavemente {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+@keyframes fade {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
