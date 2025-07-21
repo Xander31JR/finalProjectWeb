@@ -372,6 +372,12 @@ def listaAsignacion(request):
 
 
 
+import os
+from django.conf import settings
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import requests
+import json
 
 @csrf_exempt
 def enviar_pdf_telegram(request):
@@ -384,6 +390,7 @@ def enviar_pdf_telegram(request):
             
             token = "7992982183:AAH2kYLicJ5zM6NrAYExc_IowviLRJ723zo"
             
+            # Enviar mensaje primero
             requests.post(
                 f"https://api.telegram.org/bot{token}/sendMessage",
                 data={
@@ -393,24 +400,38 @@ def enviar_pdf_telegram(request):
                 }
             )
             
-            if data['pdf_url']:
-                from django.conf import settings
-                pdf_full_url = request.build_absolute_uri(data['pdf_url'])
-                print("URL completa del PDF:", pdf_full_url)
-                
-                pdf_response = requests.get(pdf_full_url, stream=True)
-                pdf_response.raise_for_status()
-                
-                files = {'document': ('reporte.pdf', pdf_response.content)}
-                requests.post(
+            # Enviar PDF desde el sistema de archivos
+            pdf_path = os.path.join(settings.STATIC_ROOT, 'pwa', 'cert', 'tramite.pdf')
+            
+            # Verificar si el archivo existe
+            if not os.path.exists(pdf_path):
+                return JsonResponse({
+                    'status': 'error',
+                    'message': f'Archivo PDF no encontrado en: {pdf_path}'
+                }, status=404)
+            
+            # Leer y enviar el PDF
+            with open(pdf_path, 'rb') as pdf_file:
+                files = {'document': ('certificado.pdf', pdf_file)}
+                response = requests.post(
                     f"https://api.telegram.org/bot{token}/sendDocument",
-                    data={'chat_id': data['chat_id']},
-                    files=files
+                    data={'chat_id': data['chat_id'], 'caption': 'Certificado adjunto'},
+                    files=files,
+                    timeout=30  # Aumentar timeout para archivos grandes
                 )
+                response.raise_for_status()
             
             return JsonResponse({'status': 'success'})
             
+        except requests.exceptions.RequestException as e:
+            return JsonResponse({
+                'status': 'error',
+                'message': f'Error al comunicarse con Telegram: {str(e)}'
+            }, status=500)
         except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+            return JsonResponse({
+                'status': 'error',
+                'message': f'Error interno: {str(e)}'
+            }, status=500)
     
     return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=405)
