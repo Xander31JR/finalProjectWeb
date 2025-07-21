@@ -12,9 +12,7 @@ import requests
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
-import os
-from django.conf import settings
-from django.http import FileResponse
+
 from django.utils import timezone
 
 
@@ -380,33 +378,39 @@ def enviar_pdf_telegram(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            chat_id = data['chat_id']
-            mensaje = data['mensaje']
-
-            # Ruta absoluta al PDF (ajusta según tu estructura)
-            pdf_path = os.path.join(settings.STATIC_ROOT, 'pwa', 'cert', 'tramite.pdf')
-
-            # Verifica que el archivo exista
-            if not os.path.exists(pdf_path):
-                return JsonResponse({'status': 'error', 'message': 'PDF no encontrado'}, status=404)
-
-            # Envía mensaje a Telegram
-            token = "TU_TOKEN_DE_TELEGRAM"
+            
+            if not all(key in data for key in ['pdf_url', 'chat_id', 'mensaje']):
+                return JsonResponse({'status': 'error', 'message': 'Datos incompletos'}, status=400)
+            
+            token = "7992982183:AAH2kYLicJ5zM6NrAYExc_IowviLRJ723zo"
+            
             requests.post(
                 f"https://api.telegram.org/bot{token}/sendMessage",
-                data={'chat_id': chat_id, 'text': mensaje, 'parse_mode': 'Markdown'}
+                data={
+                    'chat_id': data['chat_id'],
+                    'text': data['mensaje'],
+                    'parse_mode': 'Markdown'
+                }
             )
-
-            # Envía el PDF
-            with open(pdf_path, 'rb') as pdf_file:
-                files = {'document': ('tramite.pdf', pdf_file)}
+            
+            if data['pdf_url']:
+                from django.conf import settings
+                pdf_full_url = request.build_absolute_uri(data['pdf_url'])
+                print("URL completa del PDF:", pdf_full_url)
+                
+                pdf_response = requests.get(pdf_full_url, stream=True)
+                pdf_response.raise_for_status()
+                
+                files = {'document': ('reporte.pdf', pdf_response.content)}
                 requests.post(
                     f"https://api.telegram.org/bot{token}/sendDocument",
-                    data={'chat_id': chat_id},
+                    data={'chat_id': data['chat_id']},
                     files=files
                 )
-
+            
             return JsonResponse({'status': 'success'})
-
+            
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+    
+    return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=405)
